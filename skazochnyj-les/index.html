@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Сказочный лес — Род существительных</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+button{touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
+body{font-family:'Nunito',sans-serif;min-height:100vh;overflow-x:hidden;user-select:none;}
+
+/* ===== FOREST BG ===== */
+.forest-bg{
+  position:fixed;inset:0;z-index:0;
+  background:linear-gradient(180deg,#1a0533 0%,#2d1b4e 25%,#1b3a1b 60%,#0d2a0d 100%);
+}
+/* Stars */
+.forest-bg::before{
+  content:'';position:absolute;inset:0;
+  background-image:
+    radial-gradient(circle,#fff 1px,transparent 1px),
+    radial-gradient(circle,#fff 1px,transparent 1px),
+    radial-gradient(circle,rgba(255,255,255,0.5) 1px,transparent 1px);
+  background-size:60px 60px,90px 90px,120px 120px;
+  background-position:0 0,30px 30px,15px 45px;
+  opacity:0.5;
+  animation:starTwinkle 4s ease-in-out infinite alternate;
+}
+@keyframes starTwinkle{from{opacity:0.4;}to{opacity:0.7;}}
+
+/* Moon */
+.moon{position:fixed;top:18px;left:24px;font-size:52px;z-index:0;animation:moonGlow 3s ease-in-out infinite;}
+@keyframes moonGlow{0%,100%{filter:drop-shadow(0 0 8px #FFD700);}50%{filter:drop-shadow(0 0 22px #FFD700);}}
+
+/* Fireflies */
+.firefly{position:fixed;border-radius:50%;background:#AEEA00;width:5px;height:5px;pointer-events:none;z-index:0;animation:fireflyFloat ease-in-out infinite;}
+@keyframes fireflyFloat{0%{transform:translate(0,0);opacity:0;}30%{opacity:1;}70%{opacity:0.8;}100%{transform:translate(var(--tx),var(--ty));opacity:0;}}
+
+/* Trees */
+.tree-row{position:fixed;bottom:0;left:0;right:0;display:flex;justify-content:space-around;z-index:0;pointer-events:none;}
+.tree{font-size:36px;animation:treeSway 3s ease-in-out infinite;}
+.tree:nth-child(even){animation-delay:-1.5s;}
+@keyframes treeSway{0%,100%{transform:rotate(-2deg) translateY(0);}50%{transform:rotate(2deg) translateY(-4px);}}
+
+/* Floating magic particles */
+.magic-particle{position:fixed;pointer-events:none;z-index:0;animation:magicFloat linear infinite;font-size:14px;opacity:0.6;}
+@keyframes magicFloat{0%{transform:translateY(100vh) rotate(0deg);opacity:0;}20%{opacity:0.6;}80%{opacity:0.4;}100%{transform:translateY(-20vh) rotate(360deg);opacity:0;}}
+
+.screen{display:none;position:relative;z-index:1;}
+.screen.active{display:flex;flex-direction:column;align-items:center;min-height:100vh;}
+
+/* ===== MENU ===== */
+#menu{padding:16px 16px 36px;text-align:center;}
+.menu-logo{font-size:72px;display:block;margin-top:10px;animation:fairyBob 2s ease-in-out infinite;}
+@keyframes fairyBob{0%,100%{transform:translateY(0) rotate(-5deg);}50%{transform:translateY(-14px) rotate(5deg);}}
+.menu-title{font-size:36px;font-weight:900;color:#FFD700;text-shadow:3px 3px 0 rgba(0,0,0,0.5),0 0 30px rgba(255,215,0,0.6);margin:10px 0 4px;line-height:1.2;}
+.menu-sub{font-size:14px;color:#E8F5E9;background:rgba(0,0,0,0.3);padding:5px 18px;border-radius:50px;margin:0 0 28px;font-weight:700;display:inline-block;border:1px solid rgba(255,215,0,0.3);}
+
+.mode-wrap{display:flex;flex-direction:column;gap:13px;width:100%;max-width:360px;}
+.mode-btn{padding:20px 22px;border-radius:22px;border:2px solid rgba(255,215,0,0.4);cursor:pointer;font-family:'Nunito',sans-serif;color:#fff;display:flex;align-items:center;gap:14px;transition:all 0.15s;box-shadow:0 6px 0 rgba(0,0,0,0.3),0 0 20px rgba(0,0,0,0.2);}
+.mode-btn:active{transform:translateY(4px);box-shadow:0 2px 0 rgba(0,0,0,0.3);}
+.mb-icon{font-size:36px;flex-shrink:0;}
+.mb-txt{display:flex;flex-direction:column;text-align:left;}
+.mb-name{font-size:18px;font-weight:900;}
+.mb-desc{font-size:11px;font-weight:600;opacity:0.85;margin-top:2px;}
+.btn-solo{background:linear-gradient(135deg,#7B1FA2,#4A148C);}
+.btn-duo{background:linear-gradient(135deg,#1565C0,#0D47A1);}
+.author-tag{margin-top:24px;color:rgba(255,255,255,0.25);font-size:12px;letter-spacing:2px;font-weight:700;}
+
+/* ===== HEADER ===== */
+.game-hdr{background:rgba(0,0,0,0.35);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;width:100%;backdrop-filter:blur(6px);border-bottom:1px solid rgba(255,215,0,0.2);}
+.back-btn{background:rgba(255,215,0,0.15);border:2px solid rgba(255,215,0,0.4);color:#FFD700;font-family:'Nunito',sans-serif;font-size:13px;font-weight:800;padding:8px 16px;border-radius:50px;cursor:pointer;transition:all 0.15s;}
+.back-btn:active{transform:translateY(2px);}
+.hdr-info{color:#FFD700;font-size:14px;font-weight:800;text-shadow:0 0 10px rgba(255,215,0,0.5);}
+
+/* ===== PROGRESS FAIRY ===== */
+.fairy-track{width:100%;padding:10px 12px 4px;}
+.track-lbl{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;}
+.t-name{font-size:13px;font-weight:900;color:#FFD700;text-shadow:0 0 8px rgba(255,215,0,0.5);}
+.t-score{background:rgba(255,215,0,0.15);border:1px solid rgba(255,215,0,0.3);border-radius:50px;padding:2px 12px;color:#FFD700;font-size:12px;font-weight:800;}
+.fairy-road{
+  height:50px;
+  background:rgba(0,0,0,0.3);
+  border-radius:16px;
+  border:2px solid rgba(255,215,0,0.25);
+  position:relative;overflow:hidden;
+}
+/* magic dust trail */
+.fairy-road::before{
+  content:'✨✨✨✨✨✨✨✨✨✨';
+  position:absolute;top:50%;left:0;right:0;
+  transform:translateY(-50%);
+  font-size:10px;letter-spacing:6px;
+  opacity:0.3;animation:dustMove 2s linear infinite;
+}
+@keyframes dustMove{from{letter-spacing:6px;}to{letter-spacing:12px;opacity:0;}}
+.fairy-hero{position:absolute;top:50%;transform:translateY(-55%) scaleX(-1);font-size:28px;transition:left 0.55s cubic-bezier(0.34,1.4,0.64,1);z-index:2;}
+.fairy-finish{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:22px;z-index:2;}
+.fairy-bar-wrap{height:6px;background:rgba(255,255,255,0.1);border-radius:3px;margin-top:5px;overflow:hidden;}
+.fairy-bar{height:100%;border-radius:3px;background:linear-gradient(90deg,#E040FB,#FFD700);transition:width 0.5s ease;}
+
+/* ===== MAGIC SCROLL (word display) ===== */
+.scroll-wrap{margin:10px 12px 6px;display:flex;flex-direction:column;align-items:center;}
+.magic-scroll{
+  background:linear-gradient(135deg,rgba(255,248,220,0.95),rgba(255,235,170,0.9));
+  border:3px solid rgba(255,215,0,0.7);
+  border-radius:20px;
+  padding:16px 24px;
+  text-align:center;
+  width:100%;max-width:380px;
+  box-shadow:0 6px 30px rgba(0,0,0,0.4),0 0 20px rgba(255,215,0,0.2);
+  position:relative;
+  overflow:hidden;
+}
+/* scroll curl effect */
+.magic-scroll::before,.magic-scroll::after{
+  content:'';position:absolute;
+  width:24px;height:100%;top:0;
+  background:linear-gradient(90deg,rgba(200,160,60,0.4),transparent);
+}
+.magic-scroll::before{left:0;}
+.magic-scroll::after{right:0;transform:scaleX(-1);}
+.scroll-q{font-size:11px;font-weight:800;color:#795548;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;}
+.scroll-word{font-size:42px;font-weight:900;color:#3E2723;text-shadow:1px 1px 0 rgba(255,255,255,0.5);animation:wordAppear 0.35s ease;}
+@keyframes wordAppear{0%{transform:scale(0.5);opacity:0;}70%{transform:scale(1.08);}100%{transform:scale(1);opacity:1;}}
+.scroll-hint{font-size:13px;color:#6D4C41;margin-top:5px;font-weight:700;font-style:italic;}
+
+/* ===== GENDER BUTTONS (mushrooms/crystals) ===== */
+.gender-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:10px;padding:0 12px;width:100%;max-width:440px;
+}
+.gender-btn{
+  padding:16px 6px;border-radius:20px;
+  border:3px solid rgba(255,255,255,0.3);
+  font-family:'Nunito',sans-serif;
+  cursor:pointer;color:#fff;text-align:center;
+  transition:all 0.14s;
+  display:flex;flex-direction:column;align-items:center;gap:5px;
+  box-shadow:0 6px 0 rgba(0,0,0,0.3);
+  position:relative;overflow:hidden;
+}
+.gender-btn:active{transform:translateY(5px);box-shadow:0 1px 0 rgba(0,0,0,0.3);}
+.gender-btn::before{content:'';position:absolute;inset:0;background:rgba(255,255,255,0.08);opacity:0;transition:opacity 0.2s;}
+.gender-btn:hover::before{opacity:1;}
+.gb-icon{font-size:30px;}
+.gb-name{font-size:16px;font-weight:900;}
+.gb-hint{font-size:11px;font-weight:600;opacity:0.85;}
+.gb-word{font-size:12px;font-weight:700;opacity:0.75;font-style:italic;}
+
+/* Mushroom red = мужской */
+.g-male{background:linear-gradient(135deg,#1565C0,#0D47A1);box-shadow:0 6px 0 #0A237E;}
+/* Flower pink = женский */
+.g-female{background:linear-gradient(135deg,#AD1457,#880E4F);box-shadow:0 6px 0 #560027;}
+/* Crystal = средний */
+.g-neutral{background:linear-gradient(135deg,#2E7D32,#1B5E20);box-shadow:0 6px 0 #003300;}
+
+.gender-btn.correct-flash{animation:cFlash 0.4s ease;background:linear-gradient(135deg,#F9A825,#F57F17)!important;box-shadow:0 6px 0 #E65100!important;}
+.gender-btn.wrong-flash{animation:wShake 0.4s ease;}
+@keyframes cFlash{0%{transform:scale(1);}50%{transform:scale(1.07);}100%{transform:scale(1);}}
+@keyframes wShake{0%,100%{transform:translateX(0);}30%{transform:translateX(-9px);}70%{transform:translateX(9px);}}
+
+/* ===== DUO SCREEN ===== */
+#duoScreen{padding:0 0 16px;width:100%;}
+.duo-tracks{width:100%;padding:8px 10px 4px;display:flex;flex-direction:column;gap:7px;}
+.duo-score-strip{margin:4px 12px;background:rgba(0,0,0,0.3);border-radius:14px;padding:7px 16px;display:flex;align-items:center;justify-content:space-between;color:#FFD700;font-size:14px;font-weight:900;border:1px solid rgba(255,215,0,0.2);}
+.vs-badge{background:#FFD700;color:#1a1a2e;border-radius:50px;padding:2px 14px;font-size:13px;font-weight:900;}
+
+.duo-panels{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:6px 10px 0;}
+.duo-panel{border-radius:18px;padding:9px 7px;display:flex;flex-direction:column;align-items:center;gap:7px;}
+.dp1{background:rgba(123,31,162,0.2);border:2px solid rgba(123,31,162,0.5);}
+.dp2{background:rgba(21,101,192,0.2);border:2px solid rgba(21,101,192,0.5);}
+.dp-hdr{width:100%;text-align:center;border-radius:10px;padding:5px 4px;font-size:13px;font-weight:900;color:#fff;}
+.dp1 .dp-hdr{background:#7B1FA2;}
+.dp2 .dp-hdr{background:#1565C0;}
+
+/* Mini scroll for duo */
+.mini-scroll{
+  background:linear-gradient(135deg,rgba(255,248,220,0.92),rgba(255,235,170,0.85));
+  border:2px solid rgba(255,215,0,0.6);
+  border-radius:14px;padding:10px 8px;text-align:center;
+  width:100%;
+  box-shadow:0 4px 16px rgba(0,0,0,0.3);
+}
+.ms-ql{font-size:8px;font-weight:800;color:#795548;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:3px;}
+.ms-word{font-size:20px;font-weight:900;color:#3E2723;line-height:1.2;}
+
+/* Duo gender buttons */
+.duo-gender-grid{display:flex;flex-direction:column;gap:5px;width:100%;}
+.duo-gb{
+  padding:9px 6px;border-radius:13px;
+  border:2px solid rgba(255,255,255,0.25);
+  font-family:'Nunito',sans-serif;font-size:12px;font-weight:800;
+  cursor:pointer;color:#fff;text-align:center;
+  display:flex;align-items:center;gap:6px;justify-content:center;
+  box-shadow:0 3px 0 rgba(0,0,0,0.3);
+  transition:all 0.12s;
+}
+.duo-gb:active{transform:translateY(3px);box-shadow:0 0 0 rgba(0,0,0,0.3);}
+.duo-gb .dg-icon{font-size:16px;}
+.d1-male{background:linear-gradient(135deg,#1565C0,#0D47A1);box-shadow:0 3px 0 #0A237E;}
+.d1-female{background:linear-gradient(135deg,#AD1457,#880E4F);box-shadow:0 3px 0 #560027;}
+.d1-neutral{background:linear-gradient(135deg,#2E7D32,#1B5E20);box-shadow:0 3px 0 #003300;}
+.d2-male{background:linear-gradient(135deg,#1565C0,#0D47A1);box-shadow:0 3px 0 #0A237E;}
+.d2-female{background:linear-gradient(135deg,#AD1457,#880E4F);box-shadow:0 3px 0 #560027;}
+.d2-neutral{background:linear-gradient(135deg,#2E7D32,#1B5E20);box-shadow:0 3px 0 #003300;}
+.duo-gb.correct-flash{animation:cFlash 0.4s ease;background:linear-gradient(135deg,#F9A825,#F57F17)!important;box-shadow:0 3px 0 #E65100!important;}
+.duo-gb.wrong-flash{animation:wShake 0.35s ease;}
+
+/* ===== RESULTS ===== */
+#results{justify-content:center;align-items:center;text-align:center;padding:30px 16px;}
+.result-card{background:linear-gradient(135deg,rgba(255,248,220,0.96),rgba(255,235,170,0.93));border-radius:28px;padding:32px 24px;max-width:360px;width:100%;box-shadow:0 10px 50px rgba(0,0,0,0.5),0 0 30px rgba(255,215,0,0.2);border:3px solid rgba(255,215,0,0.5);}
+.result-emoji{font-size:76px;margin-bottom:10px;display:block;animation:resultBounce 0.5s ease;}
+@keyframes resultBounce{0%{transform:scale(0) rotate(-20deg);}70%{transform:scale(1.15) rotate(5deg);}100%{transform:scale(1) rotate(0);}}
+.result-title{font-size:30px;font-weight:900;color:#3E2723;margin-bottom:6px;}
+.result-stars{font-size:30px;margin:8px 0;}
+.result-score{font-size:16px;color:#6D4C41;margin-bottom:4px;font-weight:700;}
+.result-btns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:22px;}
+.res-btn{padding:13px 26px;border-radius:50px;border:none;font-family:'Nunito',sans-serif;font-size:14px;font-weight:900;cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,0.2);}
+.res-btn:active{transform:translateY(3px);}
+.res-btn.primary{background:linear-gradient(135deg,#7B1FA2,#4A148C);color:#fff;}
+.res-btn.secondary{background:rgba(255,215,0,0.2);color:#3E2723;border:2px solid rgba(255,215,0,0.4);}
+
+/* TOAST */
+.toast{position:fixed;top:14px;left:50%;transform:translateX(-50%) translateY(-100px);padding:10px 22px;border-radius:50px;font-size:15px;font-weight:800;transition:transform 0.28s cubic-bezier(0.34,1.56,0.64,1);z-index:999;white-space:nowrap;box-shadow:0 6px 24px rgba(0,0,0,0.4);}
+.toast.show{transform:translateX(-50%) translateY(0);}
+.toast.correct-t{background:linear-gradient(135deg,#F9A825,#F57F17);color:#fff;}
+.toast.wrong-t{background:linear-gradient(135deg,#C62828,#FF5252);color:#fff;}
+.toast.info-t{background:rgba(255,248,220,0.95);color:#3E2723;border:2px solid rgba(255,215,0,0.5);}
+
+/* CONFETTI */
+.confetti-piece{position:fixed;border-radius:3px;animation:confettiFall linear forwards;pointer-events:none;z-index:9999;}
+@keyframes confettiFall{0%{transform:translateY(-30px) rotate(0deg);opacity:1;}100%{transform:translateY(110vh) rotate(540deg);opacity:0;}}
+
+/* Winner overlay */
+.winner-overlay{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.6);align-items:center;justify-content:center;}
+.winner-overlay.show{display:flex;}
+.winner-box{background:linear-gradient(135deg,rgba(255,248,220,0.97),rgba(255,235,170,0.94));border-radius:28px;padding:36px 28px;text-align:center;max-width:300px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.5),0 0 30px rgba(255,215,0,0.3);border:3px solid rgba(255,215,0,0.6);animation:resultBounce 0.5s ease;}
+.w-emoji{font-size:60px;display:block;margin-bottom:10px;}
+.w-title{font-size:24px;font-weight:900;color:#3E2723;margin-bottom:6px;}
+.w-sub{font-size:15px;color:#6D4C41;margin-bottom:20px;font-weight:700;}
+.w-btns{display:flex;gap:10px;justify-content:center;}
+
+/* Music */
+.music-btn{position:fixed;bottom:14px;right:14px;z-index:99;width:44px;height:44px;border-radius:50%;background:rgba(255,215,0,0.15);border:2px solid rgba(255,215,0,0.4);font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 0 rgba(0,0,0,0.2);}
+</style>
+</head>
+<body>
+
+<div class="forest-bg"></div>
+<div class="moon">🌙</div>
+<div class="toast" id="toast"></div>
+<div id="confettiBox" style="position:fixed;inset:0;pointer-events:none;z-index:9999;"></div>
+<button class="music-btn" id="musicBtn" onclick="toggleMusic()">🎵</button>
+
+<!-- Winner overlay -->
+<div class="winner-overlay" id="winnerOverlay">
+  <div class="winner-box">
+    <span class="w-emoji" id="wEmoji"></span>
+    <div class="w-title" id="wTitle"></div>
+    <div class="w-sub" id="wSub"></div>
+    <div class="w-btns">
+      <button class="res-btn primary" onclick="closeWinner();playAgain()">Ещё раз!</button>
+      <button class="res-btn secondary" onclick="closeWinner();goMenu()">Меню</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MENU ===== -->
+<div class="screen active" id="menu">
+  <span class="menu-logo">🧚</span>
+  <div class="menu-title">Сказочный лес</div>
+  <div class="menu-sub">Род имён существительных • 2–4 класс ✨</div>
+  <div class="mode-wrap">
+    <button class="mode-btn btn-solo" onclick="startSolo()">
+      <span class="mb-icon">🔮</span>
+      <span class="mb-txt">
+        <span class="mb-name">Один игрок</span>
+        <span class="mb-desc">10 слов — помоги фее добраться до замка!</span>
+      </span>
+    </button>
+    <button class="mode-btn btn-duo" onclick="startDuo()">
+      <span class="mb-icon">🧚🧝</span>
+      <span class="mb-txt">
+        <span class="mb-name">Соревнование на двоих</span>
+        <span class="mb-desc">Свои слова у каждого — кто быстрее?</span>
+      </span>
+    </button>
+  </div>
+  <div class="author-tag">@dlya.urokov23</div>
+</div>
+
+<!-- ===== SOLO ===== -->
+<div class="screen" id="soloScreen">
+  <div class="game-hdr">
+    <button class="back-btn" onclick="goMenu()">← Меню</button>
+    <div class="hdr-info" id="soloInfo">Слово 1 / 10</div>
+  </div>
+  <div class="fairy-track">
+    <div class="track-lbl">
+      <span class="t-name">🧚 Фея</span>
+      <span class="t-score" id="soloScore">0 ✅</span>
+    </div>
+    <div class="fairy-road">
+      <div class="fairy-hero" id="soloFairy" style="left:4px;">🧚</div>
+      <div class="fairy-finish">🏰</div>
+    </div>
+    <div class="fairy-bar-wrap"><div class="fairy-bar" id="soloBar" style="width:0%"></div></div>
+  </div>
+
+  <div class="scroll-wrap">
+    <div class="magic-scroll">
+      <div class="scroll-q">Определи род существительного</div>
+      <div class="scroll-word" id="soloWord">слово</div>
+      <div class="scroll-hint" id="soloHint">Подставь: мой / моя / моё</div>
+    </div>
+  </div>
+
+  <div class="gender-grid" id="soloGenders">
+    <button class="gender-btn g-male" onclick="soloAns('male')">
+      <span class="gb-icon">🗡️</span>
+      <span class="gb-name">Мужской</span>
+      <span class="gb-hint">он, мой</span>
+      <span class="gb-word">–, -й, -ь</span>
+    </button>
+    <button class="gender-btn g-female" onclick="soloAns('female')">
+      <span class="gb-icon">🌸</span>
+      <span class="gb-name">Женский</span>
+      <span class="gb-hint">она, моя</span>
+      <span class="gb-word">-а, -я, -ь</span>
+    </button>
+    <button class="gender-btn g-neutral" onclick="soloAns('neutral')">
+      <span class="gb-icon">💎</span>
+      <span class="gb-name">Средний</span>
+      <span class="gb-hint">оно, моё</span>
+      <span class="gb-word">-о, -е</span>
+    </button>
+  </div>
+</div>
+
+<!-- ===== DUO ===== -->
+<div class="screen" id="duoScreen">
+  <div class="game-hdr">
+    <button class="back-btn" onclick="goMenu()">← Меню</button>
+    <div class="hdr-info">Первый до 10 — в замке! 🏰</div>
+  </div>
+
+  <div class="duo-tracks">
+    <div class="fairy-track" style="padding:0;">
+      <div class="track-lbl">
+        <span class="t-name">🧚 Игрок 1</span>
+        <span class="t-score" id="d1Score">0 ✅</span>
+      </div>
+      <div class="fairy-road">
+        <div class="fairy-hero" id="car1" style="left:4px;">🧚</div>
+        <div class="fairy-finish">🏰</div>
+      </div>
+      <div class="fairy-bar-wrap"><div class="fairy-bar" id="bar1" style="width:0%"></div></div>
+    </div>
+    <div class="fairy-track" style="padding:0;margin-top:7px;">
+      <div class="track-lbl">
+        <span class="t-name">🧝 Игрок 2</span>
+        <span class="t-score" id="d2Score">0 ✅</span>
+      </div>
+      <div class="fairy-road">
+        <div class="fairy-hero" id="car2" style="left:4px;">🧝</div>
+        <div class="fairy-finish">🏰</div>
+      </div>
+      <div class="fairy-bar-wrap"><div class="fairy-bar" id="bar2" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <div class="duo-score-strip">
+    <span>🧚 <span id="ds1">0</span></span>
+    <span class="vs-badge">VS</span>
+    <span><span id="ds2">0</span> 🧝</span>
+  </div>
+
+  <div class="duo-panels">
+    <!-- Player 1 -->
+    <div class="duo-panel dp1">
+      <div class="dp-hdr">🧚 Игрок 1</div>
+      <div class="mini-scroll">
+        <div class="ms-ql">Определи род</div>
+        <div class="ms-word" id="p1Word">?</div>
+      </div>
+      <div class="duo-gender-grid" id="p1Genders"></div>
+    </div>
+    <!-- Player 2 -->
+    <div class="duo-panel dp2">
+      <div class="dp-hdr">🧝 Игрок 2</div>
+      <div class="mini-scroll">
+        <div class="ms-ql">Определи род</div>
+        <div class="ms-word" id="p2Word">?</div>
+      </div>
+      <div class="duo-gender-grid" id="p2Genders"></div>
+    </div>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div class="screen" id="results">
+  <div class="result-card">
+    <span class="result-emoji" id="resEmoji">🏆</span>
+    <div class="result-title" id="resTitle"></div>
+    <div class="result-stars" id="resStars"></div>
+    <div class="result-score" id="resScore"></div>
+    <div class="result-btns">
+      <button class="res-btn primary" onclick="playAgain()">Ещё раз! ✨</button>
+      <button class="res-btn secondary" onclick="goMenu()">Меню 🏠</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== DECORATIONS =====
+(function(){
+  // Fireflies
+  for(let i=0;i<18;i++){
+    const f=document.createElement('div');f.className='firefly';
+    const tx=(Math.random()-0.5)*120,ty=(Math.random()-0.5)*120;
+    f.style.cssText=`left:${Math.random()*100}vw;top:${10+Math.random()*75}vh;--tx:${tx}px;--ty:${ty}px;animation-duration:${2+Math.random()*4}s;animation-delay:-${Math.random()*4}s;`;
+    document.body.appendChild(f);
+  }
+  // Trees
+  const tr=document.createElement('div');tr.className='tree-row';
+  const trees=['🌲','🌳','🌲','🌳','🌲','🌳','🌲','🌳','🌲','🌳','🌲'];
+  trees.forEach((t,i)=>{const s=document.createElement('span');s.className='tree';s.textContent=t;s.style.animationDelay=`${i*0.25}s`;tr.appendChild(s);});
+  document.body.appendChild(tr);
+  // Magic particles
+  const mp=['⭐','✨','🌟','💫','🍄','🌿','🍀'];
+  for(let i=0;i<12;i++){
+    const p=document.createElement('div');p.className='magic-particle';
+    p.textContent=mp[~~(Math.random()*mp.length)];
+    p.style.cssText=`left:${Math.random()*100}vw;animation-duration:${6+Math.random()*10}s;animation-delay:-${Math.random()*10}s;`;
+    document.body.appendChild(p);
+  }
+})();
+
+// ===== AUDIO =====
+let audioCtx=null,musicOn=true,bgTimer=null,bgIdx=0;
+// Fairy-tale melody
+const mel=[392,440,494,523,494,440,392,349,392,440,523,494,440,349,392];
+function getCtx(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx;}
+function tone(f,d,type='sine',vol=0.13){
+  try{const c=getCtx(),o=c.createOscillator(),g=c.createGain();
+  o.connect(g);g.connect(c.destination);o.type=type;o.frequency.value=f;
+  g.gain.setValueAtTime(vol,c.currentTime);g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+d);
+  o.start();o.stop(c.currentTime+d);}catch(e){}
+}
+function playOk(){tone(659,.1,'sine',.22);setTimeout(()=>tone(784,.1,'sine',.22),90);setTimeout(()=>tone(1047,.22,'sine',.25),180);}
+function playNo(){tone(220,.08,'triangle',.15);setTimeout(()=>tone(196,.22,'triangle',.12),80);}
+function playClick(){tone(523,.07,'sine',.1);}
+function playWin(){[523,659,784,1047,1319].forEach((f,i)=>setTimeout(()=>tone(f,.18,'sine',.24),i*90));}
+function bgNote(){if(!musicOn)return;tone(mel[bgIdx%mel.length],.38,'triangle',.048);bgIdx++;bgTimer=setTimeout(bgNote,450);}
+function startBg(){stopBg();if(musicOn)bgNote();}
+function stopBg(){if(bgTimer)clearTimeout(bgTimer);}
+function toggleMusic(){musicOn=!musicOn;document.getElementById('musicBtn').textContent=musicOn?'🎵':'🔇';if(musicOn)startBg();else stopBg();}
+
+// Confetti
+const CC=['#FFD700','#E040FB','#69F0AE','#FF6E40','#40C4FF','#F9A825','#B9F6CA'];
+function confetti(){
+  const b=document.getElementById('confettiBox');
+  for(let i=0;i<100;i++)setTimeout(()=>{
+    const p=document.createElement('div');p.className='confetti-piece';
+    p.style.cssText=`left:${Math.random()*100}vw;background:${CC[~~(Math.random()*CC.length)]};width:${6+Math.random()*10}px;height:${6+Math.random()*10}px;border-radius:${Math.random()>.4?'50%':'3px'};animation-duration:${1.8+Math.random()*2}s;animation-delay:${Math.random()*.6}s;`;
+    b.appendChild(p);setTimeout(()=>p.remove(),4500);
+  },i*18);
+}
+
+// Toast
+let toastT=null;
+function toast(msg,type){const t=document.getElementById('toast');if(toastT)clearTimeout(toastT);t.textContent=msg;t.className=`toast show ${type}-t`;toastT=setTimeout(()=>t.classList.remove('show'),1500);}
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+function goMenu(){stopBg();playClick();showScreen('menu');startBg();}
+
+// ===== WORD POOLS =====
+const pool={
+  male:[
+    {w:'лес',h:'мой лес'},{w:'стол',h:'мой стол'},{w:'дом',h:'мой дом'},
+    {w:'кот',h:'мой кот'},{w:'волк',h:'мой волк'},{w:'дуб',h:'мой дуб'},
+    {w:'день',h:'мой день'},{w:'конь',h:'мой конь'},{w:'гриб',h:'мой гриб'},
+    {w:'снег',h:'мой снег'},{w:'огонь',h:'мой огонь'},{w:'путь',h:'мой путь'},
+    {w:'дракон',h:'мой дракон'},{w:'меч',h:'мой меч'},{w:'король',h:'мой король'},
+    {w:'замок',h:'мой замок'},{w:'эльф',h:'мой эльф'},{w:'гном',h:'мой гном'},
+    {w:'ветер',h:'мой ветер'},{w:'камень',h:'мой камень'},
+  ],
+  female:[
+    {w:'река',h:'моя река'},{w:'луна',h:'моя луна'},{w:'сказка',h:'моя сказка'},
+    {w:'книга',h:'моя книга'},{w:'осень',h:'моя осень'},{w:'дочь',h:'моя дочь'},
+    {w:'мышь',h:'моя мышь'},{w:'фея',h:'моя фея'},{w:'звезда',h:'моя звезда'},
+    {w:'тропа',h:'моя тропа'},{w:'роза',h:'моя роза'},{w:'берёза',h:'моя берёза'},
+    {w:'ночь',h:'моя ночь'},{w:'кровать',h:'моя кровать'},{w:'любовь',h:'моя любовь'},
+    {w:'земля',h:'моя земля'},{w:'зима',h:'моя зима'},{w:'весна',h:'моя весна'},
+    {w:'ведьма',h:'моя ведьма'},{w:'принцесса',h:'моя принцесса'},
+  ],
+  neutral:[
+    {w:'небо',h:'моё небо'},{w:'море',h:'моё море'},{w:'поле',h:'моё поле'},
+    {w:'сердце',h:'моё сердце'},{w:'дерево',h:'моё дерево'},{w:'облако',h:'моё облако'},
+    {w:'солнце',h:'моё солнце'},{w:'утро',h:'моё утро'},{w:'счастье',h:'моё счастье'},
+    {w:'зеркало',h:'моё зеркало'},{w:'золото',h:'моё золото'},{w:'яблоко',h:'моё яблоко'},
+    {w:'озеро',h:'моё озеро'},{w:'войско',h:'моё войско'},{w:'зелье',h:'моё зелье'},
+    {w:'окно',h:'моё окно'},{w:'болото',h:'моё болото'},{w:'чудо',h:'моё чудо'},
+    {w:'лукошко',h:'моё лукошко'},{w:'кольцо',h:'моё кольцо'},
+  ],
+};
+const genders=['male','female','neutral'];
+const gInfo={
+  male:{label:'Мужской',icon:'🗡️',hint:'он, мой'},
+  female:{label:'Женский',icon:'🌸',hint:'она, моя'},
+  neutral:{label:'Средний',icon:'💎',hint:'оно, моё'},
+};
+
+let lastUsed={male:[],female:[],neutral:[]};
+function shuffle(a){return[...a].sort(()=>Math.random()-.5);}
+function pickWord(gender){
+  let avail=pool[gender].filter(w=>!lastUsed[gender].includes(w.w));
+  if(!avail.length){lastUsed[gender]=[];avail=[...pool[gender]];}
+  const w=shuffle(avail)[0];
+  lastUsed[gender].push(w.w);if(lastUsed[gender].length>8)lastUsed[gender].shift();
+  return w;
+}
+function genWordQ(){
+  const gender=genders[~~(Math.random()*3)];
+  const item=pickWord(gender);
+  return{word:item.w,hint:item.h,gender};
+}
+
+// Move hero
+function moveHero(heroId,barId,progress){
+  const hero=document.getElementById(heroId);
+  const road=hero.parentElement;
+  const rw=road.offsetWidth||300;
+  const maxPx=rw-44-12;
+  hero.style.left=Math.max(4,Math.min(4+progress*maxPx,rw-44))+'px';
+  if(barId)document.getElementById(barId).style.width=(progress*100)+'%';
+}
+
+// ===== SOLO =====
+let soloQ={},soloScore=0,soloTotal=10,soloAnswered=false,currentMode='solo';
+
+function startSolo(){
+  playClick();currentMode='solo';
+  soloScore=0;soloAnswered=false;
+  document.getElementById('soloScore').textContent='0 ✅';
+  moveHero('soloFairy','soloBar',0);
+  showScreen('soloScreen');startBg();
+  nextSoloQ();
+}
+
+function nextSoloQ(){
+  soloAnswered=false;
+  if(soloScore>=soloTotal){endSolo();return;}
+  soloQ=genWordQ();
+  const wEl=document.getElementById('soloWord');
+  wEl.style.animation='none';void wEl.offsetWidth;wEl.style.animation='wordAppear 0.35s ease';
+  wEl.textContent=soloQ.word;
+  document.getElementById('soloHint').textContent='Подставь: '+soloQ.hint.split(' ').slice(0,2).join(' ')+' / моя / моё';
+  document.getElementById('soloInfo').textContent=`Слово ${soloScore+1} / ${soloTotal}`;
+  // enable all buttons
+  document.querySelectorAll('#soloGenders .gender-btn').forEach(b=>{
+    b.disabled=false;
+    b.classList.remove('correct-flash','wrong-flash');
+  });
+}
+
+function soloAns(chosen){
+  if(soloAnswered)return;soloAnswered=true;
+  const btns=document.querySelectorAll('#soloGenders .gender-btn');
+  const map=['male','female','neutral'];
+  btns.forEach((b,i)=>{
+    if(map[i]===chosen){
+      if(chosen===soloQ.gender){
+        b.classList.add('correct-flash');
+        soloScore++;
+        document.getElementById('soloScore').textContent=soloScore+' ✅';
+        moveHero('soloFairy','soloBar',soloScore/soloTotal);
+        playOk();
+        toast('✅ Верно! '+gInfo[soloQ.gender].icon+' '+gInfo[soloQ.gender].label,'correct');
+      } else {
+        b.classList.add('wrong-flash');
+        playNo();
+        toast('❌ Это '+gInfo[soloQ.gender].icon+' '+gInfo[soloQ.gender].label,'wrong');
+      }
+    }
+    if(map[i]===soloQ.gender&&chosen!==soloQ.gender)b.classList.add('correct-flash');
+    b.disabled=true;
+  });
+  setTimeout(nextSoloQ,1300);
+}
+
+function endSolo(){
+  stopBg();
+  const pct=Math.round(soloScore/soloTotal*100);
+  let e,t,s,m;
+  if(pct===100){e='🏰';t='В замке!';s='⭐⭐⭐';m='Все 10 из 10! Волшебно!';}
+  else if(pct>=70){e='🌟';t='Отлично!';s='⭐⭐';m=soloScore+' из '+soloTotal+'. Фея почти долетела!';}
+  else if(pct>=50){e='🍄';t='Хорошо!';s='⭐';m=soloScore+' из '+soloTotal+'. Тренируйся ещё!';}
+  else{e='🧚';t='Не сдавайся!';s='💪';m=soloScore+' из '+soloTotal+'. Попробуй снова!';}
+  document.getElementById('resEmoji').textContent=e;
+  document.getElementById('resTitle').textContent=t;
+  document.getElementById('resStars').textContent=s;
+  document.getElementById('resScore').textContent=m;
+  if(pct>=70){confetti();playWin();}else tone(280,.5,'triangle',.12);
+  setTimeout(()=>showScreen('results'),500);
+}
+
+// ===== DUO =====
+let p1={q:{},score:0,locked:false};
+let p2={q:{},score:0,locked:false};
+const DUO_WIN=10;
+
+function startDuo(){
+  playClick();currentMode='duo';
+  p1={q:{},score:0,locked:false};
+  p2={q:{},score:0,locked:false};
+  ['d1Score','d2Score'].forEach(id=>document.getElementById(id).textContent='0 ✅');
+  ['ds1','ds2'].forEach(id=>document.getElementById(id).textContent='0');
+  moveHero('car1','bar1',0);moveHero('car2','bar2',0);
+  showScreen('duoScreen');startBg();
+  newDuoQ(1);newDuoQ(2);
+}
+
+function buildDuoGenders(containerId,pl,state){
+  const el=document.getElementById(containerId);
+  el.innerHTML='';
+  const prefix=pl===1?'d1':'d2';
+  genders.forEach(g=>{
+    const inf=gInfo[g];
+    const btn=document.createElement('button');
+    btn.className=`duo-gb ${prefix}-${g}`;
+    btn.innerHTML=`<span class="dg-icon">${inf.icon}</span>${inf.label} (${inf.hint})`;
+    btn.dataset.gender=g;
+    let _fired=false;
+    const handler=(e)=>{
+      e.preventDefault();e.stopPropagation();
+      if(_fired)return;_fired=true;
+      duoAns(pl,g,btn,el,state);
+      setTimeout(()=>{_fired=false;},500);
+    };
+    btn.addEventListener('touchstart',handler,{passive:false});
+    btn.addEventListener('click',handler);
+    el.appendChild(btn);
+  });
+}
+
+function newDuoQ(pl){
+  const state=pl===1?p1:p2;
+  state.q=genWordQ();state.locked=false;
+  const wEl=document.getElementById('p'+pl+'Word');
+  wEl.textContent=state.q.word;
+  buildDuoGenders('p'+pl+'Genders',pl,state);
+}
+
+function duoAns(pl,chosen,btn,container,state){
+  if(state.locked)return;
+  if(chosen===state.q.gender){
+    state.locked=true;
+    btn.classList.add('correct-flash');
+    state.score++;
+    document.getElementById('d'+pl+'Score').textContent=state.score+' ✅';
+    document.getElementById('ds'+pl).textContent=state.score;
+    moveHero('car'+pl,'bar'+pl,state.score/DUO_WIN);
+    playOk();
+    container.querySelectorAll('.duo-gb').forEach(b=>b.disabled=true);
+    if(state.score>=DUO_WIN){setTimeout(()=>endDuo(pl),700);return;}
+    setTimeout(()=>newDuoQ(pl),900);
+  } else {
+    btn.classList.add('wrong-flash');playNo();
+    setTimeout(()=>btn.classList.remove('wrong-flash'),380);
+  }
+}
+
+function endDuo(winner){
+  stopBg();confetti();playWin();
+  document.getElementById('wEmoji').textContent=winner===1?'🧚':'🧝';
+  document.getElementById('wTitle').textContent='Победил Игрок '+winner+'! 🏰';
+  document.getElementById('wSub').textContent='Счёт: 🧚'+p1.score+' — '+p2.score+' 🧝';
+  document.getElementById('winnerOverlay').classList.add('show');
+}
+
+function closeWinner(){document.getElementById('winnerOverlay').classList.remove('show');}
+function playAgain(){closeWinner();if(currentMode==='solo')startSolo();else startDuo();}
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+
+window.addEventListener('click',()=>{if(!audioCtx){getCtx();if(musicOn)startBg();}},{once:true});
+
+// ===== TOUCH PROTECTION =====
+document.addEventListener('touchstart',function(e){if(e.touches.length>1)e.preventDefault();},{passive:false});
+document.addEventListener('touchmove',function(e){if(e.touches.length>1)e.preventDefault();},{passive:false});
+var _lt=0;
+document.addEventListener('touchend',function(e){var n=Date.now();if(n-_lt<350)e.preventDefault();_lt=n;},{passive:false});
+
+</script>
+</body>
+</html>

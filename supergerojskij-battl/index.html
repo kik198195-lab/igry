@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Супергеройский Баттл 2.0</title>
+    <style>
+        :root { --blue: #00d2ff; --red: #ff0055; --gold: #ffd700; --green: #28a745; }
+        body { margin: 0; font-family: 'Segoe UI', Arial, sans-serif; background: #0f0f1a; color: white; display: flex; flex-direction: column; align-items: center; overflow: hidden; height: 100vh; }
+        
+        .header { background: #16213e; width: 100%; padding: 15px; text-align: center; border-bottom: 4px solid var(--gold); box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        h1 { margin: 0; font-size: 24px; letter-spacing: 2px; color: var(--gold); }
+
+        .game-container { display: flex; width: 100%; flex: 1; justify-content: space-around; align-items: center; padding: 20px; box-sizing: border-box; }
+
+        /* Калькуляторы */
+        .calc { background: #1b1b2f; padding: 20px; border-radius: 20px; border: 3px solid #333; width: 250px; text-align: center; transition: 0.3s; }
+        .team-1 { border-color: var(--blue); }
+        .team-2 { border-color: var(--red); }
+        
+        .math-box { font-size: 32px; font-weight: bold; margin-bottom: 10px; height: 40px; }
+        .screen { background: #eee; color: #000; font-size: 36px; height: 50px; line-height: 50px; border-radius: 10px; margin-bottom: 15px; font-weight: bold; transition: 0.2s; }
+        
+        .keys { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+        button { padding: 15px; font-size: 20px; border: none; border-radius: 8px; cursor: pointer; background: #2d3436; color: white; font-weight: bold; }
+        button:active { transform: scale(0.9); }
+        .btn-enter { grid-column: span 3; background: var(--green); margin-top: 5px; }
+        .btn-clr { background: #636e72; }
+
+        /* Пирамида */
+        .pyramid { position: relative; width: 450px; height: 450px; border-bottom: 10px solid #333; }
+        .step { position: absolute; height: 12px; background: #444; border: 1px solid #555; width: 45px; border-radius: 3px; }
+        
+        .char { position: absolute; width: 80px; height: 80px; transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 10; object-fit: contain; }
+        #cup { position: absolute; top: -40px; left: 50%; transform: translateX(-50%); width: 90px; opacity: 0; transition: 1s; z-index: 20; }
+
+        /* Окно победы */
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; }
+        .modal button { padding: 20px 40px; font-size: 24px; background: var(--gold); color: black; border-radius: 50px; border: none; cursor: pointer; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1 id="round-txt">ТУР 1: ТАБЛИЦА НА 2</h1>
+</div>
+
+<div class="game-container">
+    <div id="calc-1" class="calc team-1">
+        <h3 style="color:var(--blue)">БЭТМЕН</h3>
+        <div id="q1" class="math-box">2 x 1</div>
+        <div id="s1" class="screen"></div>
+        <div class="keys">
+            <button onclick="press(1,1)">1</button><button onclick="press(1,2)">2</button><button onclick="press(1,3)">3</button>
+            <button onclick="press(1,4)">4</button><button onclick="press(1,5)">5</button><button onclick="press(1,6)">6</button>
+            <button onclick="press(1,7)">7</button><button onclick="press(1,8)">8</button><button onclick="press(1,9)">9</button>
+            <button onclick="clr(1)" class="btn-clr">C</button><button onclick="press(1,0)">0</button>
+            <button onclick="check(1)" class="btn-enter">ГОТОВО</button>
+        </div>
+    </div>
+
+    <div class="pyramid" id="pyramid">
+        <img id="cup" src="https://cdn-icons-png.flaticon.com/512/3112/3112946.png" alt="🏆">
+        <img id="hero1" class="char" src="https://www.pngplay.com/wp-content/uploads/12/Batman-Transparent-Image.png" onerror="this.src='https://img.icons8.com/color/96/batman.png'" style="left:0; bottom:0;">
+        <img id="hero2" class="char" src="https://www.pngplay.com/wp-content/uploads/12/Spider-Man-Transparent-PNG.png" onerror="this.src='https://img.icons8.com/color/96/spiderman-new.png'" style="right:0; bottom:0;">
+    </div>
+
+    <div id="calc-2" class="calc team-2">
+        <h3 style="color:var(--red)">ПАУК</h3>
+        <div id="q2" class="math-box">2 x 1</div>
+        <div id="s2" class="screen"></div>
+        <div class="keys">
+            <button onclick="press(2,1)">1</button><button onclick="press(2,2)">2</button><button onclick="press(2,3)">3</button>
+            <button onclick="press(2,4)">4</button><button onclick="press(2,5)">5</button><button onclick="press(2,6)">6</button>
+            <button onclick="press(2,7)">7</button><button onclick="press(2,8)">8</button><button onclick="press(2,9)">9</button>
+            <button onclick="clr(2)" class="btn-clr">C</button><button onclick="press(2,0)">0</button>
+            <button onclick="check(2)" class="btn-enter">ГОТОВО</button>
+        </div>
+    </div>
+</div>
+
+<div id="win-modal" class="modal">
+    <h1 id="win-msg" style="margin-bottom: 30px;">БЭТМЕН ПОБЕДИЛ!</h1>
+    <button onclick="startNextRound()">СЛЕДУЮЩИЙ ТУР</button>
+</div>
+
+<script>
+    let roundMultiplier = 2;
+    let score = { 1: 0, 2: 0 };
+    let currentTask = { 1: 0, 2: 0 };
+    const totalSteps = 9;
+
+    // Звуковой движок
+    const audio = new (window.AudioContext || window.webkitAudioContext)();
+    function beep(freq, type, duration, vol=0.1) {
+        const osc = audio.createOscillator();
+        const g = audio.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audio.currentTime);
+        g.gain.setValueAtTime(vol, audio.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.0001, audio.currentTime + duration);
+        osc.connect(g); g.connect(audio.destination);
+        osc.start(); osc.stop(audio.currentTime + duration);
+    }
+
+    function soundCorrect() { beep(600, 'sine', 0.2); setTimeout(()=>beep(900, 'sine', 0.2), 100); }
+    function soundError() { beep(150, 'sawtooth', 0.4, 0.05); }
+    function soundWin() { 
+        [523, 659, 783, 1046].forEach((f, i) => setTimeout(() => beep(f, 'square', 0.5), i * 150));
+    }
+
+    function buildPyramid() {
+        const py = document.getElementById('pyramid');
+        for(let i=1; i<=totalSteps; i++) {
+            let left = document.createElement('div');
+            left.className = 'step';
+            left.style.bottom = (i * 45) + 'px';
+            left.style.left = (i * 20) + 'px';
+            py.appendChild(left);
+
+            let right = document.createElement('div');
+            right.className = 'step';
+            right.style.bottom = (i * 45) + 'px';
+            right.style.right = (i * 20) + 'px';
+            py.appendChild(right);
+        }
+    }
+
+    function newTask(t) {
+        let n = Math.floor(Math.random() * 9) + 1;
+        currentTask[t] = roundMultiplier * n;
+        document.getElementById('q'+t).innerText = `${roundMultiplier} x ${n}`;
+        document.getElementById('s'+t).innerText = '';
+    }
+
+    function press(t, v) { document.getElementById('s'+t).innerText += v; }
+    function clr(t) { document.getElementById('s'+t).innerText = ''; }
+
+    function check(t) {
+        let val = parseInt(document.getElementById('s'+t).innerText);
+        let screen = document.getElementById('s'+t);
+        let calc = document.getElementById('calc-'+t);
+
+        if(val === currentTask[t]) {
+            score[t]++;
+            soundCorrect();
+            calc.style.borderColor = "var(--green)";
+            setTimeout(() => calc.style.borderColor = (t===1?"var(--blue)":"var(--red)"), 400);
+            updatePos(t);
+            if(score[t] >= totalSteps) showWin(t);
+            else newTask(t);
+        } else {
+            soundError();
+            screen.style.background = "#ff7675";
+            setTimeout(() => { screen.style.background = "#eee"; clr(t); }, 400);
+        }
+    }
+
+    function updatePos(t) {
+        let h = document.getElementById('hero'+t);
+        h.style.bottom = (score[t] * 45) + 'px';
+        if(t === 1) h.style.left = (score[t] * 20) + 'px';
+        else h.style.right = (score[t] * 20) + 'px';
+    }
+
+    function showWin(t) {
+        soundWin();
+        document.getElementById('cup').style.opacity = '1';
+        document.getElementById('win-msg').innerText = (t===1?"БЭТМЕН":"ПАУК") + " ВЗЯЛ КУБОК!";
+        document.getElementById('win-modal').style.display = 'flex';
+    }
+
+    function startNextRound() {
+        roundMultiplier++;
+        if(roundMultiplier > 9) {
+            alert("ВЫ ПРОШЛИ ВСЮ ИГРУ!");
+            roundMultiplier = 2;
+        }
+        score = { 1: 0, 2: 0 };
+        document.getElementById('round-txt').innerText = `ТУР: ТАБЛИЦА НА ${roundMultiplier}`;
+        document.getElementById('win-modal').style.display = 'none';
+        document.getElementById('cup').style.opacity = '0';
+        updatePos(1); updatePos(2);
+        newTask(1); newTask(2);
+    }
+
+    buildPyramid();
+    newTask(1); newTask(2);
+</script>
+</body>
+</html>

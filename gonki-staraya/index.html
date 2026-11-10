@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Гонки — Таблица умножения</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+button{touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
+body{font-family:'Nunito',sans-serif;background:#87CEEB;min-height:100vh;overflow-x:hidden;user-select:none;}
+
+.sky{position:fixed;inset:0;z-index:0;background:linear-gradient(180deg,#4FC3F7 0%,#87CEEB 45%,#C8E6C9 72%,#66BB6A 100%);}
+.sun{position:fixed;top:16px;right:24px;width:64px;height:64px;background:radial-gradient(circle,#FFD700,#FFA500);border-radius:50%;box-shadow:0 0 30px #FFD700,0 0 60px rgba(255,215,0,0.4);animation:sunPulse 3s ease-in-out infinite;z-index:0;}
+@keyframes sunPulse{0%,100%{box-shadow:0 0 30px #FFD700,0 0 60px rgba(255,215,0,0.4);}50%{box-shadow:0 0 50px #FFD700,0 0 100px rgba(255,215,0,0.5);}}
+
+.cloud{position:fixed;background:#fff;border-radius:50px;opacity:0.9;animation:cloudMove linear infinite;}
+.cloud::before,.cloud::after{content:'';position:absolute;background:#fff;border-radius:50%;}
+.c1{width:110px;height:36px;top:9%;left:-130px;animation-duration:28s;}
+.c1::before{width:55px;height:50px;top:-28px;left:14px;}
+.c1::after{width:42px;height:40px;top:-22px;left:52px;}
+.c2{width:80px;height:28px;top:20%;left:-100px;animation-duration:38s;animation-delay:-14s;opacity:0.7;}
+.c2::before{width:40px;height:38px;top:-22px;left:10px;}
+.c2::after{width:32px;height:32px;top:-16px;left:38px;}
+.c3{width:140px;height:40px;top:6%;left:-160px;animation-duration:22s;animation-delay:-8s;}
+.c3::before{width:65px;height:58px;top:-32px;left:18px;}
+.c3::after{width:50px;height:46px;top:-26px;left:65px;}
+@keyframes cloudMove{from{left:-200px;}to{left:110vw;}}
+
+.screen{display:none;position:relative;z-index:1;}
+.screen.active{display:flex;flex-direction:column;align-items:center;min-height:100vh;}
+
+/* ===== MENU ===== */
+#menu{padding:16px 16px 36px;text-align:center;}
+.menu-emoji{font-size:64px;animation:carBounce 0.9s ease-in-out infinite alternate;display:block;margin-top:8px;}
+@keyframes carBounce{from{transform:translateY(0);}to{transform:translateY(-10px);}}
+.menu-title{font-size:36px;font-weight:900;color:#1a237e;text-shadow:3px 3px 0 #fff;margin:8px 0 4px;}
+.menu-sub{font-size:14px;color:#fff;background:rgba(0,0,0,0.18);padding:5px 16px;border-radius:50px;margin:0 0 20px;font-weight:700;display:inline-block;}
+.table-label{font-size:15px;font-weight:800;color:#1a237e;margin-bottom:8px;}
+.tables-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;max-width:340px;width:100%;margin-bottom:18px;}
+.tbl-btn{padding:11px 4px;border-radius:13px;border:3px solid #fff;background:#FFF9C4;color:#E65100;font-family:'Nunito',sans-serif;font-size:16px;font-weight:900;cursor:pointer;transition:all 0.15s;box-shadow:0 4px 0 #E65100;}
+.tbl-btn:active{transform:translateY(3px);box-shadow:0 1px 0 #E65100;}
+.tbl-btn.selected{background:#FF6F00;color:#fff;box-shadow:0 4px 0 #BF360C;border-color:#FF6F00;}
+.tbl-btn.all{background:#1565C0;color:#fff;box-shadow:0 4px 0 #0D47A1;border-color:#1565C0;grid-column:span 4;font-size:14px;padding:9px;}
+.mode-wrap{display:flex;flex-direction:column;gap:11px;width:100%;max-width:340px;}
+.mode-big-btn{padding:18px 22px;border-radius:20px;border:3px solid rgba(255,255,255,0.6);cursor:pointer;font-family:'Nunito',sans-serif;font-size:17px;font-weight:900;color:#fff;display:flex;align-items:center;gap:12px;transition:all 0.15s;box-shadow:0 5px 0 rgba(0,0,0,0.2);}
+.mode-big-btn:active{transform:translateY(4px);box-shadow:0 1px 0 rgba(0,0,0,0.2);}
+.mb-icon{font-size:32px;flex-shrink:0;}
+.mb-text{display:flex;flex-direction:column;text-align:left;}
+.mb-name{font-size:17px;}
+.mb-desc{font-size:11px;font-weight:600;opacity:0.85;margin-top:2px;}
+.btn-solo{background:linear-gradient(135deg,#FF6B6B,#D32F2F);}
+.btn-duo{background:linear-gradient(135deg,#43A047,#1B5E20);}
+.author-tag{margin-top:20px;color:rgba(0,0,0,0.25);font-size:11px;letter-spacing:2px;font-weight:700;}
+
+/* ===== TRACKS ===== */
+.race-header{background:rgba(0,0,0,0.14);padding:9px 14px;display:flex;align-items:center;justify-content:space-between;width:100%;}
+.back-btn{background:#fff;border:none;color:#1a237e;font-family:'Nunito',sans-serif;font-size:13px;font-weight:800;padding:7px 15px;border-radius:50px;cursor:pointer;box-shadow:0 3px 0 rgba(0,0,0,0.15);transition:all 0.15s;}
+.back-btn:active{transform:translateY(2px);}
+.race-info{color:#fff;font-size:14px;font-weight:800;text-shadow:1px 1px 0 rgba(0,0,0,0.25);}
+
+.tracks-wrap{width:100%;padding:10px 10px 6px;display:flex;flex-direction:column;gap:8px;}
+.track-row{background:rgba(0,0,0,0.1);border-radius:18px;padding:9px 11px;}
+.track-label{display:flex;align-items:center;gap:7px;margin-bottom:6px;}
+.pl-name{font-size:13px;font-weight:900;color:#fff;text-shadow:1px 1px 0 rgba(0,0,0,0.25);}
+.pl-score{margin-left:auto;background:rgba(255,255,255,0.25);border-radius:50px;padding:2px 11px;color:#fff;font-size:12px;font-weight:800;}
+
+/* Road */
+.road{height:48px;background:linear-gradient(180deg,#616161,#424242);border-radius:14px;position:relative;overflow:hidden;border:3px solid #212121;}
+/* Grass strips on road edges */
+.road::before,.road::after{content:'';position:absolute;left:0;right:0;height:6px;background:repeating-linear-gradient(90deg,#388E3C 0,#388E3C 20px,#2E7D32 20px,#2E7D32 40px);}
+.road::before{top:0;}
+.road::after{bottom:0;}
+
+.road-dash{position:absolute;top:50%;left:0;right:0;height:4px;transform:translateY(-50%);background:repeating-linear-gradient(90deg,#FFD700 0,#FFD700 28px,transparent 28px,transparent 56px);animation:dashMove 0.4s linear infinite;}
+@keyframes dashMove{from{transform:translateY(-50%) translateX(0);}to{transform:translateY(-50%) translateX(56px);}}
+.road-dash.stopped{animation:none;}
+
+/* Car moves LEFT → RIGHT */
+.track-car{position:absolute;top:50%;transform:translateY(-55%) scaleX(-1);font-size:30px;transition:left 0.55s cubic-bezier(0.34,1.4,0.64,1);z-index:3;filter:drop-shadow(2px 2px 3px rgba(0,0,0,0.35));}
+.finish-flag{position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:24px;z-index:2;}
+.speed-bar{height:6px;background:rgba(255,255,255,0.25);border-radius:3px;margin-top:6px;overflow:hidden;}
+.speed-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,#FFD700,#FF6B6B);transition:width 0.5s ease;}
+
+/* ===== SOLO SCREEN ===== */
+#soloScreen{padding:0 0 20px;width:100%;}
+.question-area{margin:8px 10px;background:#fff;border-radius:22px;padding:18px 14px;text-align:center;box-shadow:0 5px 0 rgba(0,0,0,0.08);border:3px solid #E3F2FD;}
+.q-label{font-size:11px;font-weight:800;color:#90A4AE;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;}
+.q-number{font-size:46px;font-weight:900;color:#1a237e;animation:qPop 0.35s ease;}
+@keyframes qPop{0%{transform:scale(0.5);opacity:0;}70%{transform:scale(1.1);}100%{transform:scale(1);opacity:1;}}
+.solo-answers{display:grid;grid-template-columns:1fr 1fr;gap:9px;padding:0 10px;}
+.ans-btn{padding:17px 8px;border-radius:16px;border:3px solid rgba(0,0,0,0.1);font-family:'Nunito',sans-serif;font-size:22px;font-weight:900;cursor:pointer;transition:all 0.12s;color:#fff;box-shadow:0 5px 0 rgba(0,0,0,0.18);}
+.ans-btn:active{transform:translateY(4px);box-shadow:0 1px 0 rgba(0,0,0,0.18);}
+.a0{background:#FF5252;box-shadow:0 5px 0 #B71C1C;}
+.a1{background:#FF9800;box-shadow:0 5px 0 #E65100;}
+.a2{background:#4CAF50;box-shadow:0 5px 0 #2E7D32;}
+.a3{background:#2196F3;box-shadow:0 5px 0 #1565C0;}
+.ans-btn.correct-flash{animation:cFlash 0.4s ease;background:#4CAF50!important;box-shadow:0 5px 0 #2E7D32!important;}
+.ans-btn.wrong-flash{animation:wShake 0.4s ease;}
+@keyframes cFlash{0%{transform:scale(1);}50%{transform:scale(1.08);}100%{transform:scale(1);}}
+@keyframes wShake{0%,100%{transform:translateX(0);}30%{transform:translateX(-8px);}70%{transform:translateX(8px);}}
+
+/* ===== DUO SCREEN ===== */
+#duoScreen{padding:0 0 16px;width:100%;}
+
+.duo-players-wrap{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  padding:8px 10px 4px;
+}
+
+.duo-player-panel{
+  border-radius:18px;
+  padding:10px 8px;
+  display:flex;flex-direction:column;align-items:center;
+  gap:8px;
+}
+.dp-p1{background:rgba(255,82,82,0.12);border:2px solid rgba(255,82,82,0.35);}
+.dp-p2{background:rgba(33,150,243,0.12);border:2px solid rgba(33,150,243,0.35);}
+
+.dp-header{
+  width:100%;text-align:center;
+  border-radius:10px;padding:5px 4px;
+  font-size:13px;font-weight:900;color:#fff;
+  letter-spacing:0.5px;
+}
+.dp-p1 .dp-header{background:#FF5252;}
+.dp-p2 .dp-header{background:#2196F3;}
+
+.dp-question{
+  background:#fff;border-radius:14px;
+  padding:10px 6px;text-align:center;
+  width:100%;
+  box-shadow:0 3px 0 rgba(0,0,0,0.08);
+  border:2px solid #E3F2FD;
+}
+.dp-q-label{font-size:9px;font-weight:800;color:#90A4AE;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px;}
+.dp-q-num{font-size:26px;font-weight:900;color:#1a237e;line-height:1;}
+
+.dp-opts{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:6px;width:100%;
+}
+.dp-btn{
+  padding:12px 4px;border-radius:12px;
+  border:2px solid rgba(0,0,0,0.1);
+  font-family:'Nunito',sans-serif;font-size:17px;font-weight:900;
+  cursor:pointer;color:#fff;text-align:center;
+  transition:all 0.12s;
+  box-shadow:0 3px 0 rgba(0,0,0,0.18);
+}
+.dp-btn:active{transform:translateY(3px);box-shadow:0 0 0 rgba(0,0,0,0.18);}
+.p1-b0{background:#FF5252;box-shadow:0 3px 0 #B71C1C;}
+.p1-b1{background:#E91E63;box-shadow:0 3px 0 #880E4F;}
+.p1-b2{background:#FF9800;box-shadow:0 3px 0 #E65100;}
+.p1-b3{background:#F44336;box-shadow:0 3px 0 #B71C1C;}
+.p2-b0{background:#2196F3;box-shadow:0 3px 0 #1565C0;}
+.p2-b1{background:#9C27B0;box-shadow:0 3px 0 #6A1B9A;}
+.p2-b2{background:#00BCD4;box-shadow:0 3px 0 #006064;}
+.p2-b3{background:#3F51B5;box-shadow:0 3px 0 #1A237E;}
+.dp-btn.correct-flash{animation:cFlash 0.4s ease;background:#4CAF50!important;box-shadow:0 3px 0 #2E7D32!important;}
+.dp-btn.wrong-flash{animation:wShake 0.35s ease;}
+
+/* Duo score strip */
+.duo-score-strip{
+  background:rgba(0,0,0,0.14);margin:0 10px;
+  border-radius:14px;padding:7px 16px;
+  display:flex;align-items:center;justify-content:space-between;
+  color:#fff;font-size:15px;font-weight:900;
+}
+.vs-badge{background:#FFD700;color:#1a237e;border-radius:50px;padding:2px 12px;font-size:13px;}
+
+/* ===== RESULTS ===== */
+#results{justify-content:center;align-items:center;text-align:center;padding:30px 16px;}
+.result-card{background:#fff;border-radius:28px;padding:32px 24px;max-width:360px;width:100%;box-shadow:0 8px 0 rgba(0,0,0,0.08);border:4px solid #E3F2FD;}
+.result-emoji{font-size:76px;margin-bottom:10px;display:block;animation:resultBounce 0.5s ease;}
+@keyframes resultBounce{0%{transform:scale(0) rotate(-20deg);}70%{transform:scale(1.15) rotate(5deg);}100%{transform:scale(1) rotate(0);}}
+.result-title{font-size:30px;font-weight:900;color:#1a237e;margin-bottom:6px;}
+.result-stars{font-size:30px;margin:8px 0;}
+.result-score{font-size:17px;color:#546E7A;margin-bottom:4px;font-weight:700;}
+.result-btns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:22px;}
+.res-btn{padding:14px 26px;border-radius:50px;border:none;font-family:'Nunito',sans-serif;font-size:14px;font-weight:900;cursor:pointer;transition:all 0.15s;box-shadow:0 4px 0 rgba(0,0,0,0.18);}
+.res-btn:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,0.18);}
+.res-btn.primary{background:#FF6B6B;color:#fff;box-shadow:0 4px 0 #B71C1C;}
+.res-btn.secondary{background:#E3F2FD;color:#1a237e;box-shadow:0 4px 0 #90CAF9;}
+
+/* TOAST */
+.toast{position:fixed;top:14px;left:50%;transform:translateX(-50%) translateY(-100px);padding:10px 22px;border-radius:50px;font-size:15px;font-weight:800;transition:transform 0.28s cubic-bezier(0.34,1.56,0.64,1);z-index:999;white-space:nowrap;box-shadow:0 6px 24px rgba(0,0,0,0.2);}
+.toast.show{transform:translateX(-50%) translateY(0);}
+.toast.correct-t{background:#4CAF50;color:#fff;}
+.toast.wrong-t{background:#FF5252;color:#fff;}
+.toast.info-t{background:#fff;color:#1a237e;border:2px solid #E3F2FD;}
+
+/* CONFETTI */
+.confetti-piece{position:fixed;border-radius:3px;animation:confettiFall linear forwards;pointer-events:none;z-index:9999;}
+@keyframes confettiFall{0%{transform:translateY(-30px) rotate(0deg);opacity:1;}100%{transform:translateY(110vh) rotate(540deg);opacity:0;}}
+
+/* Music */
+.music-btn{position:fixed;bottom:14px;right:14px;z-index:99;width:44px;height:44px;border-radius:50%;background:#fff;border:3px solid #E3F2FD;font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 0 rgba(0,0,0,0.1);}
+
+/* Winner overlay */
+.winner-overlay{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.55);align-items:center;justify-content:center;}
+.winner-overlay.show{display:flex;}
+.winner-box{background:#fff;border-radius:28px;padding:36px 28px;text-align:center;max-width:300px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.3);animation:resultBounce 0.5s ease;}
+.w-emoji{font-size:64px;display:block;margin-bottom:10px;}
+.w-title{font-size:26px;font-weight:900;color:#1a237e;margin-bottom:6px;}
+.w-sub{font-size:15px;color:#546E7A;margin-bottom:20px;font-weight:700;}
+.w-btns{display:flex;gap:10px;justify-content:center;}
+</style>
+</head>
+<body>
+
+<div class="sky"></div>
+<div class="sun"></div>
+<div class="cloud c1"></div>
+<div class="cloud c2"></div>
+<div class="cloud c3"></div>
+<div class="toast" id="toast"></div>
+<div id="confettiBox" style="position:fixed;inset:0;pointer-events:none;z-index:9999;"></div>
+<button class="music-btn" id="musicBtn" onclick="toggleMusic()">🎵</button>
+
+<!-- Winner overlay -->
+<div class="winner-overlay" id="winnerOverlay">
+  <div class="winner-box">
+    <span class="w-emoji" id="wEmoji"></span>
+    <div class="w-title" id="wTitle"></div>
+    <div class="w-sub" id="wSub"></div>
+    <div class="w-btns">
+      <button class="res-btn primary" onclick="closeWinner();playAgain()">Ещё раз!</button>
+      <button class="res-btn secondary" onclick="closeWinner();goMenu()">Меню</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MENU ===== -->
+<div class="screen active" id="menu">
+  <span class="menu-emoji">🚗</span>
+  <div class="menu-title">Гонки!</div>
+  <div class="menu-sub">Таблица умножения 🏁</div>
+  <div class="table-label">Выбери таблицу:</div>
+  <div class="tables-grid">
+    <button class="tbl-btn" onclick="selectTable(2,this)">× 2</button>
+    <button class="tbl-btn" onclick="selectTable(3,this)">× 3</button>
+    <button class="tbl-btn" onclick="selectTable(4,this)">× 4</button>
+    <button class="tbl-btn" onclick="selectTable(5,this)">× 5</button>
+    <button class="tbl-btn" onclick="selectTable(6,this)">× 6</button>
+    <button class="tbl-btn" onclick="selectTable(7,this)">× 7</button>
+    <button class="tbl-btn" onclick="selectTable(8,this)">× 8</button>
+    <button class="tbl-btn" onclick="selectTable(9,this)">× 9</button>
+    <button class="tbl-btn all" onclick="selectTable(0,this)">🎲 Все таблицы вместе</button>
+  </div>
+  <div class="mode-wrap">
+    <button class="mode-big-btn btn-solo" onclick="startSolo()">
+      <span class="mb-icon">🚗</span>
+      <span class="mb-text">
+        <span class="mb-name">Один игрок</span>
+        <span class="mb-desc">10 вопросов — доедь до финиша!</span>
+      </span>
+    </button>
+    <button class="mode-big-btn btn-duo" onclick="startDuo()">
+      <span class="mb-icon">🚗🚙</span>
+      <span class="mb-text">
+        <span class="mb-name">Соревнование на двоих</span>
+        <span class="mb-desc">Свои примеры у каждого — кто быстрее?</span>
+      </span>
+    </button>
+  </div>
+  <div class="author-tag">@dlya.urokov23</div>
+</div>
+
+<!-- ===== SOLO SCREEN ===== -->
+<div class="screen" id="soloScreen">
+  <div class="race-header">
+    <button class="back-btn" onclick="goMenu()">← Меню</button>
+    <div class="race-info" id="soloInfo">Вопрос 1 / 10</div>
+  </div>
+  <div class="tracks-wrap">
+    <div class="track-row">
+      <div class="track-label">
+        <span class="pl-name">🚗 Гонщик</span>
+        <span class="pl-score" id="soloScore">0 ✅</span>
+      </div>
+      <div class="road" id="soloRoad">
+        <div class="road-dash" id="soloDash"></div>
+        <div class="track-car" id="soloCar" style="left:4px;transform:translateY(-55%) scaleX(-1);">🚗</div>
+        <div class="finish-flag">🏁</div>
+      </div>
+      <div class="speed-bar"><div class="speed-fill" id="soloSpeed" style="width:0%"></div></div>
+    </div>
+  </div>
+  <div class="question-area">
+    <div class="q-label">Сколько будет?</div>
+    <div class="q-number" id="soloQ">3 × 4 = ?</div>
+  </div>
+  <div class="solo-answers">
+    <button class="ans-btn a0" id="sa0" onclick="soloAns(0)"></button>
+    <button class="ans-btn a1" id="sa1" onclick="soloAns(1)"></button>
+    <button class="ans-btn a2" id="sa2" onclick="soloAns(2)"></button>
+    <button class="ans-btn a3" id="sa3" onclick="soloAns(3)"></button>
+  </div>
+</div>
+
+<!-- ===== DUO SCREEN ===== -->
+<div class="screen" id="duoScreen">
+  <div class="race-header">
+    <button class="back-btn" onclick="goMenu()">← Меню</button>
+    <div class="race-info">Первый до 10 — победитель!</div>
+  </div>
+
+  <!-- Two tracks -->
+  <div class="tracks-wrap">
+    <div class="track-row">
+      <div class="track-label">
+        <span class="pl-name">🚗 Игрок 1</span>
+        <span class="pl-score" id="d1Score">0 ✅</span>
+      </div>
+      <div class="road">
+        <div class="road-dash" id="dash1"></div>
+        <div class="track-car" id="car1" style="left:4px;transform:translateY(-55%) scaleX(-1);">🚗</div>
+        <div class="finish-flag">🏁</div>
+      </div>
+      <div class="speed-bar"><div class="speed-fill" id="speed1" style="width:0%"></div></div>
+    </div>
+    <div class="track-row">
+      <div class="track-label">
+        <span class="pl-name">🚙 Игрок 2</span>
+        <span class="pl-score" id="d2Score">0 ✅</span>
+      </div>
+      <div class="road">
+        <div class="road-dash" id="dash2"></div>
+        <div class="track-car" id="car2" style="left:4px;transform:translateY(-55%) scaleX(-1);">🚙</div>
+        <div class="finish-flag">🏁</div>
+      </div>
+      <div class="speed-bar"><div class="speed-fill" id="speed2" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <!-- Score strip -->
+  <div class="duo-score-strip">
+    <span>🚗 <span id="ds1">0</span></span>
+    <span class="vs-badge">VS</span>
+    <span><span id="ds2">0</span> 🚙</span>
+  </div>
+
+  <!-- Two independent question panels -->
+  <div class="duo-players-wrap">
+    <!-- Player 1 -->
+    <div class="duo-player-panel dp-p1">
+      <div class="dp-header">🚗 Игрок 1</div>
+      <div class="dp-question">
+        <div class="dp-q-label">Твой пример</div>
+        <div class="dp-q-num" id="p1Q">?</div>
+      </div>
+      <div class="dp-opts" id="p1Opts"></div>
+    </div>
+    <!-- Player 2 -->
+    <div class="duo-player-panel dp-p2">
+      <div class="dp-header">🚙 Игрок 2</div>
+      <div class="dp-question">
+        <div class="dp-q-label">Твой пример</div>
+        <div class="dp-q-num" id="p2Q">?</div>
+      </div>
+      <div class="dp-opts" id="p2Opts"></div>
+    </div>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div class="screen" id="results">
+  <div class="result-card">
+    <span class="result-emoji" id="resEmoji">🏆</span>
+    <div class="result-title" id="resTitle"></div>
+    <div class="result-stars" id="resStars"></div>
+    <div class="result-score" id="resScore"></div>
+    <div class="result-btns">
+      <button class="res-btn primary" onclick="playAgain()">Ещё раз! 🔄</button>
+      <button class="res-btn secondary" onclick="goMenu()">Меню 🏠</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== AUDIO =====
+let audioCtx=null,musicOn=true,bgTimer=null,bgIdx=0;
+const mel=[392,392,440,392,523,494,392,392,440,392,587,523];
+function getCtx(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx;}
+function tone(f,d,type='square',vol=0.14){
+  try{const c=getCtx(),o=c.createOscillator(),g=c.createGain();
+  o.connect(g);g.connect(c.destination);o.type=type;o.frequency.value=f;
+  g.gain.setValueAtTime(vol,c.currentTime);g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+d);
+  o.start();o.stop(c.currentTime+d);}catch(e){}
+}
+function playOk(){tone(523,.09,'square',.2);setTimeout(()=>tone(659,.09,'square',.2),75);setTimeout(()=>tone(784,.18,'square',.22),150);}
+function playNo(){tone(200,.07,'sawtooth',.18);setTimeout(()=>tone(150,.18,'sawtooth',.14),75);}
+function playClick(){tone(440,.07,'sine',.1);}
+function playWin(){[523,587,659,784,1047].forEach((f,i)=>setTimeout(()=>tone(f,.14,'square',.22),i*85));}
+function bgNote(){if(!musicOn)return;tone(mel[bgIdx%mel.length],.32,'triangle',.045);bgIdx++;bgTimer=setTimeout(bgNote,370);}
+function startBg(){stopBg();if(musicOn)bgNote();}
+function stopBg(){if(bgTimer)clearTimeout(bgTimer);}
+function toggleMusic(){musicOn=!musicOn;document.getElementById('musicBtn').textContent=musicOn?'🎵':'🔇';if(musicOn)startBg();else stopBg();playClick();}
+
+// Confetti
+const CC=['#FF5252','#FF9800','#FFEB3B','#4CAF50','#2196F3','#9C27B0','#FF4081'];
+function confetti(){
+  const b=document.getElementById('confettiBox');
+  for(let i=0;i<90;i++)setTimeout(()=>{
+    const p=document.createElement('div');p.className='confetti-piece';
+    p.style.cssText=`left:${Math.random()*100}vw;background:${CC[~~(Math.random()*CC.length)]};width:${7+Math.random()*8}px;height:${7+Math.random()*8}px;border-radius:${Math.random()>.5?'50%':'3px'};animation-duration:${1.8+Math.random()*2}s;animation-delay:${Math.random()*.5}s;`;
+    b.appendChild(p);setTimeout(()=>p.remove(),4200);
+  },i*22);
+}
+
+// Toast
+let toastT=null;
+function toast(msg,type){
+  const t=document.getElementById('toast');if(toastT)clearTimeout(toastT);
+  t.textContent=msg;t.className=`toast show ${type}-t`;
+  toastT=setTimeout(()=>t.classList.remove('show'),1400);
+}
+
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+function goMenu(){stopBg();playClick();showScreen('menu');startBg();}
+
+// ===== GAME STATE =====
+let selectedTable=2, currentMode='solo';
+
+function selectTable(n,el){
+  playClick();selectedTable=n;
+  document.querySelectorAll('.tbl-btn').forEach(b=>b.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+// Generate question
+function genQ(){
+  const a=selectedTable===0?(~~(Math.random()*8)+2):selectedTable;
+  const b=~~(Math.random()*9)+1;
+  return{a,b,ans:a*b};
+}
+
+// Generate 4 answers including correct one
+function genOpts(correct){
+  const set=new Set([correct]);
+  let tries=0;
+  while(set.size<4&&tries<40){
+    tries++;
+    const v=correct+~~(Math.random()*22)-11;
+    if(v>0&&v!==correct)set.add(v);
+  }
+  return shuffle([...set]);
+}
+
+function shuffle(a){return[...a].sort(()=>Math.random()-.5);}
+
+// Move car: progress 0→1, car goes left→right
+function moveCar(carId,speedId,progress){
+  const car=document.getElementById(carId);
+  const road=car.parentElement;
+  const roadW=road.offsetWidth||road.clientWidth||300;
+  const maxPx=roadW - 44 - 10;
+  car.style.left=Math.max(4,Math.min(4+progress*maxPx, roadW-44))+'px';
+  car.style.transform='translateY(-55%) scaleX(-1)';
+  document.getElementById(speedId).style.width=(progress*100)+'%';
+}
+
+// ===== SOLO =====
+let soloQ={},soloOpts=[],soloScore=0,soloTotal=10,soloAnswered=false;
+
+function startSolo(){
+  playClick();currentMode='solo';
+  soloScore=0;soloAnswered=false;
+  document.getElementById('soloScore').textContent='0 ✅';
+  moveCar('soloCar','soloSpeed',0); document.getElementById('soloCar').style.transform='translateY(-55%) scaleX(-1)';
+  document.getElementById('soloDash').classList.remove('stopped');
+  showScreen('soloScreen');startBg();
+  nextSoloQ();
+}
+
+function nextSoloQ(){
+  soloAnswered=false;
+  const idx=soloScore;
+  if(idx>=soloTotal){endSolo();return;}
+  soloQ=genQ();soloOpts=genOpts(soloQ.ans);
+  const el=document.getElementById('soloQ');
+  el.style.animation='none';void el.offsetWidth;el.style.animation='qPop 0.35s ease';
+  el.textContent=`${soloQ.a} × ${soloQ.b} = ?`;
+  document.getElementById('soloInfo').textContent=`Вопрос ${idx+1} / ${soloTotal}`;
+  for(let i=0;i<4;i++){
+    const b=document.getElementById('sa'+i);
+    b.textContent=soloOpts[i];b.disabled=false;
+    b.className=`ans-btn a${i}`;
+  }
+}
+
+function soloAns(i){
+  if(soloAnswered)return;soloAnswered=true;
+  const chosen=soloOpts[i];
+  const btn=document.getElementById('sa'+i);
+  if(chosen===soloQ.ans){
+    btn.classList.add('correct-flash');
+    soloScore++;
+    document.getElementById('soloScore').textContent=soloScore+' ✅';
+    moveCar('soloCar','soloSpeed',soloScore/soloTotal);
+    playOk();
+    toast('✅ '+soloQ.a+'×'+soloQ.b+'='+soloQ.ans,'correct');
+  } else {
+    btn.classList.add('wrong-flash');playNo();
+    toast('❌ Правильно: '+soloQ.ans,'wrong');
+    for(let j=0;j<4;j++)if(soloOpts[j]===soloQ.ans)document.getElementById('sa'+j).classList.add('correct-flash');
+  }
+  for(let j=0;j<4;j++)document.getElementById('sa'+j).disabled=true;
+  setTimeout(nextSoloQ,1200);
+}
+
+function endSolo(){
+  stopBg();document.getElementById('soloDash').classList.add('stopped');
+  const pct=Math.round(soloScore/soloTotal*100);
+  let e,t,s,m;
+  if(pct===100){e='🏆';t='ЧЕМПИОН!';s='⭐⭐⭐';m='Все 10 из 10! Идеальная гонка!';}
+  else if(pct>=70){e='🥇';t='Отлично!';s='⭐⭐';m=soloScore+' из '+soloTotal+'. Почти идеально!';}
+  else if(pct>=50){e='🥈';t='Хорошо!';s='⭐';m=soloScore+' из '+soloTotal+'. Тренируйся ещё!';}
+  else{e='🚧';t='Тренируйся!';s='💪';m=soloScore+' из '+soloTotal+'. Ещё раз за руль!';}
+  document.getElementById('resEmoji').textContent=e;
+  document.getElementById('resTitle').textContent=t;
+  document.getElementById('resStars').textContent=s;
+  document.getElementById('resScore').textContent=m;
+  if(pct>=70){confetti();playWin();}else tone(300,.5,'triangle',.13);
+  setTimeout(()=>showScreen('results'),500);
+}
+
+// ===== DUO =====
+// Each player has their own independent state
+let p1={q:{},opts:[],score:0,locked:false};
+let p2={q:{},opts:[],score:0,locked:false};
+const DUO_WIN=10;
+const P1_COLORS=['p1-b0','p1-b1','p1-b2','p1-b3'];
+const P2_COLORS=['p2-b0','p2-b1','p2-b2','p2-b3'];
+
+function startDuo(){
+  p1Locked=false; p2Locked=false;
+  playClick();currentMode='duo';
+  p1={q:{},opts:[],score:0,locked:false};
+  p2={q:{},opts:[],score:0,locked:false};
+  document.getElementById('d1Score').textContent='0 ✅';
+  document.getElementById('d2Score').textContent='0 ✅';
+  document.getElementById('ds1').textContent='0';
+  document.getElementById('ds2').textContent='0';
+  moveCar('car1','speed1',0);moveCar('car2','speed2',0);document.getElementById('car1').style.transform='translateY(-55%) scaleX(-1)';document.getElementById('car2').style.transform='translateY(-55%) scaleX(-1)';
+  document.getElementById('dash1').classList.remove('stopped');
+  document.getElementById('dash2').classList.remove('stopped');
+  showScreen('duoScreen');startBg();
+  newPlayerQ(1);newPlayerQ(2);
+}
+
+function newPlayerQ(pl){
+  const state=pl===1?p1:p2;
+  state.q=genQ();state.opts=genOpts(state.q.ans);state.locked=false;
+  renderPlayerQ(pl);
+}
+
+function renderPlayerQ(pl){
+  const state=pl===1?p1:p2;
+  const colors=pl===1?P1_COLORS:P2_COLORS;
+  const qEl=document.getElementById('p'+pl+'Q');
+  qEl.style.animation='none';void qEl.offsetWidth;qEl.style.animation='qPop 0.3s ease';
+  qEl.textContent=`${state.q.a}×${state.q.b}=?`;
+  const optsEl=document.getElementById('p'+pl+'Opts');
+  optsEl.innerHTML='';
+  state.opts.forEach((val,i)=>{
+    const btn=document.createElement('button');
+    btn.className=`dp-btn ${colors[i]}`;
+    btn.textContent=val;
+    btn.onclick=()=>duoAns(pl,val,btn,state);
+    optsEl.appendChild(btn);
+  });
+}
+
+function duoAns(pl,chosen,btn,state){
+  if(state.locked)return;
+  if(chosen===state.q.ans){
+    state.locked=true;
+    btn.classList.add('correct-flash');
+    state.score++;
+    document.getElementById('d'+pl+'Score').textContent=state.score+' ✅';
+    document.getElementById('ds'+pl).textContent=state.score;
+    moveCar('car'+pl,'speed'+pl,state.score/DUO_WIN);
+    playOk();
+    // disable all buttons for this player briefly
+    document.getElementById('p'+pl+'Opts').querySelectorAll('.dp-btn').forEach(b=>b.disabled=true);
+    if(state.score>=DUO_WIN){setTimeout(()=>endDuo(pl),700);return;}
+    setTimeout(()=>newPlayerQ(pl),900);
+  } else {
+    btn.classList.add('wrong-flash');playNo();
+    setTimeout(()=>btn.classList.remove('wrong-flash'),380);
+  }
+}
+
+function endDuo(winner){
+  stopBg();confetti();playWin();
+  document.getElementById('dash1').classList.add('stopped');
+  document.getElementById('dash2').classList.add('stopped');
+  document.getElementById('wEmoji').textContent=winner===1?'🚗':'🚙';
+  document.getElementById('wTitle').textContent='Победил Игрок '+winner+'! 🏆';
+  document.getElementById('wSub').textContent='Счёт: 🚗'+p1.score+' — '+p2.score+' 🚙';
+  document.getElementById('winnerOverlay').classList.add('show');
+}
+
+function closeWinner(){document.getElementById('winnerOverlay').classList.remove('show');}
+
+function playAgain(){
+  closeWinner();
+  if(currentMode==='solo')startSolo();else startDuo();
+}
+
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+
+// Default selection
+document.querySelector('.tbl-btn').classList.add('selected');
+window.addEventListener('click',()=>{if(!audioCtx){getCtx();if(musicOn)startBg();}},{once:true});
+
+// ===== TOUCH PROTECTION =====
+// Блокируем масштабирование двумя пальцами
+document.addEventListener("touchstart", function(e){
+  if(e.touches.length > 1) e.preventDefault();
+},{passive:false});
+document.addEventListener("touchmove", function(e){
+  if(e.touches.length > 1) e.preventDefault();
+},{passive:false});
+// Блокируем двойной тап
+var lastTap=0;
+document.addEventListener("touchend", function(e){
+  var now=Date.now();
+  if(now-lastTap < 350) e.preventDefault();
+  lastTap=now;
+},{passive:false});
+// Для дуо-кнопок: реакция на touchstart а не click
+function addTouchBtn(el, fn){
+  var fired=false;
+  el.addEventListener("touchstart", function(e){
+    e.stopPropagation();
+    if(!fired){ fired=true; fn(); }
+    setTimeout(function(){ fired=false; }, 400);
+  },{passive:false});
+  el.addEventListener("click", function(e){
+    e.stopPropagation();
+    if(!fired){ fired=true; fn(); }
+    setTimeout(function(){ fired=false; }, 400);
+  });
+}
+</script>
+</body>
+</html>

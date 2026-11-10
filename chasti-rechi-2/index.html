@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Части речи — игра</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}
+
+body{
+  font-family:'Nunito',sans-serif;
+  background:#0d0d1a;
+  min-height:100vh;
+  overflow-x:hidden;
+  user-select:none;
+}
+
+.bg-orbs{position:fixed;inset:0;pointer-events:none;z-index:0;}
+.orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:0.15;animation:orbFloat linear infinite;}
+.orb1{width:400px;height:400px;background:#6c5ce7;top:-100px;left:-100px;animation-duration:20s;}
+.orb2{width:350px;height:350px;background:#e94560;top:50%;right:-80px;animation-duration:25s;animation-delay:-8s;}
+.orb3{width:300px;height:300px;background:#00cec9;bottom:-80px;left:30%;animation-duration:18s;animation-delay:-5s;}
+@keyframes orbFloat{0%{transform:translate(0,0) scale(1);}33%{transform:translate(30px,-30px) scale(1.05);}66%{transform:translate(-20px,20px) scale(0.95);}100%{transform:translate(0,0) scale(1);}}
+
+.screen{display:none;position:relative;z-index:1;}
+.screen.active{display:flex;flex-direction:column;align-items:center;min-height:100vh;}
+
+/* ===== MENU ===== */
+#menu{justify-content:center;padding:30px 16px;text-align:center;}
+.logo-wrap{position:relative;margin-bottom:10px;}
+.logo-emoji{font-size:80px;display:block;animation:logoBounce 2s ease-in-out infinite;}
+@keyframes logoBounce{0%,100%{transform:translateY(0) rotate(-5deg);}50%{transform:translateY(-15px) rotate(5deg);}}
+.logo-glow{position:absolute;inset:-20px;border-radius:50%;background:radial-gradient(circle,rgba(108,92,231,0.4),transparent 70%);animation:glowPulse 2s ease-in-out infinite;}
+@keyframes glowPulse{0%,100%{opacity:0.5;transform:scale(1);}50%{opacity:1;transform:scale(1.1);}}
+.game-title{font-size:40px;font-weight:900;color:#fff;margin:14px 0 5px;letter-spacing:-1px;text-shadow:0 0 40px rgba(108,92,231,0.8);}
+.game-subtitle{font-size:14px;color:rgba(255,255,255,0.4);margin-bottom:36px;letter-spacing:2px;text-transform:uppercase;}
+
+.menu-modes{display:flex;flex-direction:column;gap:13px;width:100%;max-width:420px;}
+.mode-btn{padding:18px 24px;border-radius:20px;border:none;cursor:pointer;font-family:'Nunito',sans-serif;font-size:16px;font-weight:800;color:#fff;text-align:left;display:flex;align-items:center;gap:14px;transition:transform 0.15s,box-shadow 0.15s;position:relative;overflow:hidden;}
+.mode-btn:hover{transform:translateY(-3px) scale(1.02);}
+.mode-btn:active{transform:scale(0.97);}
+.mode-btn::after{content:'→';position:absolute;right:20px;font-size:18px;opacity:0.5;}
+.mode-icon{font-size:34px;flex-shrink:0;}
+.mode-text{display:flex;flex-direction:column;}
+.mode-name{font-size:18px;}
+.mode-desc{font-size:12px;font-weight:400;opacity:0.75;margin-top:2px;}
+.btn-sort{background:linear-gradient(135deg,#fd79a8,#e84393);box-shadow:0 8px 28px rgba(232,67,147,0.4);}
+.btn-quiz{background:linear-gradient(135deg,#a29bfe,#6c5ce7);box-shadow:0 8px 28px rgba(108,92,231,0.4);}
+.btn-match{background:linear-gradient(135deg,#55efc4,#00b894);box-shadow:0 8px 28px rgba(0,184,148,0.4);}
+.author-tag{margin-top:32px;color:rgba(255,255,255,0.2);font-size:12px;letter-spacing:3px;text-transform:uppercase;}
+
+/* ===== HEADER ===== */
+.game-header{width:100%;max-width:500px;display:flex;align-items:center;justify-content:space-between;padding:16px 16px 8px;}
+.back-btn{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#fff;font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;padding:9px 18px;border-radius:50px;cursor:pointer;transition:all 0.2s;}
+.back-btn:hover{background:rgba(255,255,255,0.18);}
+.score-board{display:flex;gap:10px;}
+.score-item{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:50px;padding:7px 16px;color:#fff;font-size:13px;font-weight:800;}
+.score-item span{color:#ffd700;}
+
+/* ===== SORT GAME ===== */
+#sortGame{padding:0 14px 40px;}
+.sort-title{color:rgba(255,255,255,0.6);font-size:15px;text-align:center;margin-bottom:18px;}
+.word-bank{display:flex;flex-wrap:wrap;gap:9px;justify-content:center;max-width:500px;margin-bottom:24px;min-height:56px;padding:14px;background:rgba(255,255,255,0.04);border-radius:20px;border:2px dashed rgba(255,255,255,0.12);}
+.word-chip{background:rgba(255,255,255,0.1);color:#fff;padding:9px 20px;border-radius:50px;font-size:16px;font-weight:800;cursor:pointer;border:2px solid rgba(255,255,255,0.15);transition:all 0.15s;}
+.word-chip:hover{transform:scale(1.1);background:rgba(255,255,255,0.2);}
+.word-chip.selected-chip{border-color:#ffd700;background:rgba(255,215,0,0.2);color:#ffd700;transform:scale(1.08);}
+.baskets{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;max-width:500px;width:100%;}
+.basket{border-radius:20px;padding:14px;min-height:110px;border:2px solid transparent;transition:all 0.2s;cursor:pointer;position:relative;overflow:hidden;}
+.basket.noun{background:rgba(253,121,168,0.1);border-color:rgba(253,121,168,0.35);}
+.basket.verb{background:rgba(108,92,231,0.1);border-color:rgba(108,92,231,0.35);}
+.basket.adj{background:rgba(253,203,110,0.1);border-color:rgba(253,203,110,0.35);}
+.basket.adverb{background:rgba(85,239,196,0.1);border-color:rgba(85,239,196,0.35);}
+.basket-title{font-size:12px;font-weight:800;letter-spacing:1px;text-transform:uppercase;margin-bottom:2px;}
+.basket.noun .basket-title{color:#fd79a8;}
+.basket.verb .basket-title{color:#a29bfe;}
+.basket.adj .basket-title{color:#fdcb6e;}
+.basket.adverb .basket-title{color:#55efc4;}
+.basket-question{font-size:10px;color:rgba(255,255,255,0.35);margin-bottom:8px;}
+.basket-words{display:flex;flex-wrap:wrap;gap:5px;min-height:30px;}
+.basket-chip{padding:4px 11px;border-radius:50px;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.15s;}
+.basket.noun .basket-chip{background:rgba(253,121,168,0.25);color:#fd79a8;}
+.basket.verb .basket-chip{background:rgba(108,92,231,0.25);color:#a29bfe;}
+.basket.adj .basket-chip{background:rgba(253,203,110,0.25);color:#fdcb6e;}
+.basket.adverb .basket-chip{background:rgba(85,239,196,0.25);color:#55efc4;}
+
+/* ===== QUIZ GAME ===== */
+#quizGame{padding:0 14px 40px;align-items:center;}
+.quiz-progress{width:100%;max-width:500px;height:6px;background:rgba(255,255,255,0.08);border-radius:3px;margin-bottom:18px;overflow:hidden;}
+.quiz-progress-bar{height:100%;background:linear-gradient(90deg,#a29bfe,#6c5ce7,#fd79a8);border-radius:3px;transition:width 0.5s ease;}
+.quiz-card{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:26px;padding:34px 28px;max-width:500px;width:100%;text-align:center;margin-bottom:20px;backdrop-filter:blur(10px);}
+.quiz-num{color:rgba(255,255,255,0.3);font-size:12px;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;}
+.quiz-word{font-size:52px;font-weight:900;color:#fff;margin-bottom:12px;text-shadow:0 0 60px rgba(162,155,254,0.5);transition:all 0.3s;}
+.quiz-word.pop{animation:wordPop 0.4s ease;}
+@keyframes wordPop{0%{transform:scale(0.5);opacity:0;}70%{transform:scale(1.1);}100%{transform:scale(1);opacity:1;}}
+.quiz-hint{font-size:14px;color:rgba(255,255,255,0.4);font-style:italic;}
+.quiz-options{display:grid;grid-template-columns:1fr 1fr;gap:11px;max-width:500px;width:100%;}
+.quiz-opt{padding:16px 12px;border-radius:16px;border:2px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);color:#fff;font-family:'Nunito',sans-serif;font-size:15px;font-weight:800;cursor:pointer;transition:all 0.15s;display:flex;flex-direction:column;align-items:center;gap:4px;backdrop-filter:blur(6px);}
+.quiz-opt .opt-icon{font-size:24px;}
+.quiz-opt:hover{transform:scale(1.05);background:rgba(255,255,255,0.12);}
+.quiz-opt.correct{background:rgba(85,239,196,0.2)!important;border-color:#55efc4!important;animation:correctPulse 0.5s ease;}
+.quiz-opt.wrong{background:rgba(255,107,107,0.2)!important;border-color:#ff6b6b!important;animation:wrongShake 0.4s ease;}
+@keyframes correctPulse{0%{transform:scale(1);}50%{transform:scale(1.06);}100%{transform:scale(1);}}
+@keyframes wrongShake{0%,100%{transform:translateX(0);}25%{transform:translateX(-8px);}75%{transform:translateX(8px);}}
+.quiz-opt:disabled{cursor:not-allowed;opacity:0.7;}
+
+/* ===== MATCH GAME — НОВЫЙ ДИЗАЙН ===== */
+#matchGame{padding:0 14px 30px;align-items:center;width:100%;}
+
+.match-header-text{
+  color:rgba(255,255,255,0.5);font-size:14px;
+  text-align:center;margin-bottom:16px;max-width:500px;
+  line-height:1.5;
+}
+
+/* Слова — сетка */
+.words-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:9px;
+  max-width:500px;
+  width:100%;
+  margin-bottom:20px;
+}
+
+.word-card{
+  background:rgba(255,255,255,0.08);
+  border:2px solid rgba(255,255,255,0.12);
+  border-radius:16px;
+  padding:12px 8px;
+  text-align:center;
+  font-size:15px;
+  font-weight:800;
+  color:#fff;
+  cursor:pointer;
+  transition:all 0.18s;
+  min-height:52px;
+  display:flex;align-items:center;justify-content:center;
+}
+.word-card:hover{transform:scale(1.06);background:rgba(255,255,255,0.15);}
+.word-card.selected-word{
+  border-color:#ffd700;
+  background:rgba(255,215,0,0.18);
+  color:#ffd700;
+  transform:scale(1.08);
+  box-shadow:0 0 20px rgba(255,215,0,0.3);
+}
+.word-card.done-noun{background:rgba(253,121,168,0.2);border-color:#fd79a8;color:#fd79a8;cursor:default;}
+.word-card.done-verb{background:rgba(108,92,231,0.2);border-color:#a29bfe;color:#a29bfe;cursor:default;}
+.word-card.done-adj{background:rgba(253,203,110,0.2);border-color:#fdcb6e;color:#fdcb6e;cursor:default;}
+.word-card.done-adverb{background:rgba(85,239,196,0.2);border-color:#55efc4;color:#55efc4;cursor:default;}
+.word-card.wrong-flash{animation:wFlash 0.4s ease;}
+@keyframes wFlash{0%,100%{background:rgba(255,255,255,0.08);}50%{background:rgba(255,80,80,0.35);border-color:#ff6b6b;}}
+.word-card.done-noun,.word-card.done-verb,.word-card.done-adj,.word-card.done-adverb{
+  animation:matchedWord 0.4s ease;
+}
+@keyframes matchedWord{0%{transform:scale(0.9);}60%{transform:scale(1.12);}100%{transform:scale(1);}}
+
+/* Разделитель */
+.match-divider{
+  width:100%;max-width:500px;
+  display:flex;align-items:center;gap:12px;
+  margin-bottom:16px;
+}
+.match-divider::before,.match-divider::after{content:'';flex:1;height:1px;background:rgba(255,255,255,0.1);}
+.match-divider-text{color:rgba(255,255,255,0.3);font-size:12px;letter-spacing:2px;text-transform:uppercase;white-space:nowrap;}
+
+/* 4 части речи — фиксированные кнопки */
+.speech-parts{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:10px;
+  max-width:500px;
+  width:100%;
+}
+
+.speech-btn{
+  padding:16px 12px;
+  border-radius:18px;
+  border:2px solid transparent;
+  cursor:pointer;
+  font-family:'Nunito',sans-serif;
+  font-size:14px;
+  font-weight:800;
+  color:#fff;
+  display:flex;align-items:center;gap:10px;
+  transition:all 0.18s;
+  position:relative;
+  overflow:hidden;
+}
+.speech-btn:active{transform:scale(0.95);}
+.speech-btn .sp-icon{font-size:26px;flex-shrink:0;}
+.speech-btn .sp-text{display:flex;flex-direction:column;text-align:left;}
+.speech-btn .sp-name{font-size:15px;line-height:1.2;}
+.speech-btn .sp-q{font-size:11px;opacity:0.6;font-weight:400;margin-top:2px;}
+
+.speech-btn.sp-noun{background:rgba(253,121,168,0.12);border-color:rgba(253,121,168,0.4);}
+.speech-btn.sp-verb{background:rgba(108,92,231,0.12);border-color:rgba(108,92,231,0.4);}
+.speech-btn.sp-adj{background:rgba(253,203,110,0.12);border-color:rgba(253,203,110,0.4);}
+.speech-btn.sp-adverb{background:rgba(85,239,196,0.12);border-color:rgba(85,239,196,0.4);}
+
+.speech-btn.sp-noun:hover{background:rgba(253,121,168,0.25);transform:scale(1.04);}
+.speech-btn.sp-verb:hover{background:rgba(108,92,231,0.25);transform:scale(1.04);}
+.speech-btn.sp-adj:hover{background:rgba(253,203,110,0.25);transform:scale(1.04);}
+.speech-btn.sp-adverb:hover{background:rgba(85,239,196,0.25);transform:scale(1.04);}
+
+/* счётчик matched в кнопке */
+.sp-count{
+  position:absolute;right:12px;top:50%;transform:translateY(-50%);
+  background:rgba(255,255,255,0.15);
+  border-radius:50px;
+  padding:2px 8px;
+  font-size:12px;
+  color:rgba(255,255,255,0.7);
+}
+
+/* ===== RESULTS ===== */
+#results{justify-content:center;align-items:center;text-align:center;padding:40px 16px;}
+.result-emoji{font-size:90px;margin-bottom:16px;animation:resultBounce 0.6s ease;}
+@keyframes resultBounce{0%{transform:scale(0) rotate(-20deg);}70%{transform:scale(1.15) rotate(5deg);}100%{transform:scale(1) rotate(0);}}
+.result-title{font-size:36px;font-weight:900;color:#fff;margin-bottom:8px;}
+.result-score{font-size:24px;color:#ffd700;font-weight:900;margin-bottom:8px;}
+.result-msg{font-size:15px;color:rgba(255,255,255,0.45);margin-bottom:36px;max-width:340px;line-height:1.6;}
+.result-btns{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;}
+.res-btn{padding:15px 30px;border-radius:50px;border:none;font-family:'Nunito',sans-serif;font-size:15px;font-weight:800;cursor:pointer;transition:all 0.2s;}
+.res-btn:hover{transform:translateY(-3px) scale(1.05);}
+.res-btn.primary{background:linear-gradient(135deg,#a29bfe,#6c5ce7);color:#fff;box-shadow:0 8px 24px rgba(108,92,231,0.4);}
+.res-btn.secondary{background:rgba(255,255,255,0.08);color:#fff;border:1px solid rgba(255,255,255,0.15);}
+
+/* TOAST */
+.toast{position:fixed;top:22px;left:50%;transform:translateX(-50%) translateY(-120px);padding:12px 26px;border-radius:50px;font-size:16px;font-weight:800;transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);z-index:999;white-space:nowrap;box-shadow:0 10px 40px rgba(0,0,0,0.5);}
+.toast.show{transform:translateX(-50%) translateY(0);}
+.toast.correct-t{background:linear-gradient(135deg,#00b894,#55efc4);color:#fff;}
+.toast.wrong-t{background:linear-gradient(135deg,#d63031,#ff6b6b);color:#fff;}
+.toast.info-t{background:rgba(255,255,255,0.12);color:#fff;border:1px solid rgba(255,255,255,0.2);}
+
+/* CONFETTI */
+.confetti-piece{position:fixed;border-radius:2px;animation:confettiFall linear forwards;pointer-events:none;z-index:9999;}
+@keyframes confettiFall{0%{transform:translateY(-20px) rotate(0deg);opacity:1;}100%{transform:translateY(110vh) rotate(720deg);opacity:0;}}
+
+/* MUSIC BTN */
+.music-btn{position:fixed;bottom:20px;right:20px;z-index:99;width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;}
+.music-btn:hover{transform:scale(1.15);}
+</style>
+</head>
+<body>
+
+<div class="bg-orbs">
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+<button class="music-btn" id="musicBtn" onclick="toggleMusic()">🎵</button>
+<div id="confettiBox" style="position:fixed;inset:0;pointer-events:none;z-index:9999;"></div>
+
+<!-- MENU -->
+<div class="screen active" id="menu">
+  <div class="logo-wrap">
+    <div class="logo-glow"></div>
+    <span class="logo-emoji">🧠</span>
+  </div>
+  <div class="game-title">Части речи</div>
+  <div class="game-subtitle">2 – 4 класс • Русский язык</div>
+  <div class="menu-modes">
+    <button class="mode-btn btn-sort" onclick="startSort()">
+      <span class="mode-icon">🗂️</span>
+      <span class="mode-text">
+        <span class="mode-name">Разложи по корзинам</span>
+        <span class="mode-desc">Сортируй слова по частям речи</span>
+      </span>
+    </button>
+    <button class="mode-btn btn-quiz" onclick="startQuiz()">
+      <span class="mode-icon">⚡</span>
+      <span class="mode-text">
+        <span class="mode-name">Быстрый ответ</span>
+        <span class="mode-desc">Угадай часть речи — 10 вопросов</span>
+      </span>
+    </button>
+    <button class="mode-btn btn-match" onclick="startMatch()">
+      <span class="mode-icon">🔗</span>
+      <span class="mode-text">
+        <span class="mode-name">Найди пару</span>
+        <span class="mode-desc">Выбери слово → нажми часть речи</span>
+      </span>
+    </button>
+  </div>
+  <div class="author-tag">@dlya.urokov23</div>
+</div>
+
+<!-- SORT GAME -->
+<div class="screen" id="sortGame">
+  <div class="game-header">
+    <button class="back-btn" onclick="goMenu()">← Меню</button>
+    <div class="score-board">
+      <div class="score-item">✅ <span id="sortCorrect">0</span></div>
+      <div class="score-item">❌ <span id="sortWrong">0</span></div>
+    </div>
+  </div>
+  <div class="sort-title">Нажми слово → выбери корзину 👇</div>
+  <div class="word-bank" id="wordBank"></div>
+  <div class="baskets">
+    <div class="basket noun" onclick="dropWord('noun')">
+      <div class="basket-title">📦 Существительное</div>
+      <div class="basket-question">Кто? Что?</div>
+      <div class="basket-words" id="basket-noun"></div>
+    </div>
+    <div class="basket verb" onclick="dropWord('verb')">
+      <div class="basket-title">⚡ Глагол</div>
+      <div class="basket-question">Что делает?</div>
+      <div class="basket-words" id="basket-verb"></div>
+    </div>
+    <div class="basket adj" onclick="dropWord('adj')">
+      <div class="basket-title">🎨 Прилагательное</div>
+      <div class="basket-question">Какой? Какая?</div>
+      <div class="basket-words" id="basket-adj"></div>
+    </div>
+    <div class="basket adverb" onclick="dropWord('adverb')">
+      <div class="basket-title">🚀 Наречие</div>
+      <div class="basket-question">Как? Где? Когда?</div>
+      <div class="basket-words" id="basket-adverb"></div>
+    </div>
+  </div>
+</div>
+
+<!-- QUIZ GAME -->
+<div class="screen" id="quizGame">
+  <div class="game-header">
+    <button class="back-btn" onclick="goMenu()">← Меню</button>
+    <div class="score-board">
+      <div class="score-item">⭐ <span id="quizScore">0</span></div>
+    </div>
+  </div>
+  <div class="quiz-progress"><div class="quiz-progress-bar" id="quizBar" style="width:0%"></div></div>
+  <div class="quiz-card">
+    <div class="quiz-num" id="quizNum"></div>
+    <div class="quiz-word pop" id="quizWord"></div>
+    <div class="quiz-hint" id="quizHint"></div>
+  </div>
+  <div class="quiz-options" id="quizOptions"></div>
+</div>
+
+<!-- MATCH GAME — НОВЫЙ -->
+<div class="screen" id="matchGame">
+  <div class="game-header">
+    <button class="back-btn" onclick="goMenu()">← Меню</button>
+    <div class="score-board">
+      <div class="score-item">✅ <span id="matchDone">0</span>/<span id="matchTotal">0</span></div>
+    </div>
+  </div>
+
+  <div class="match-header-text" id="matchInstruction">
+    👆 Нажми на слово, затем выбери его часть речи внизу
+  </div>
+
+  <!-- Слова -->
+  <div class="words-grid" id="wordsGrid"></div>
+
+  <!-- Разделитель -->
+  <div class="match-divider">
+    <div class="match-divider-text">Части речи</div>
+  </div>
+
+  <!-- 4 фиксированные кнопки частей речи -->
+  <div class="speech-parts">
+    <button class="speech-btn sp-noun" onclick="matchAnswer('noun')">
+      <span class="sp-icon">📦</span>
+      <span class="sp-text">
+        <span class="sp-name">Существительное</span>
+        <span class="sp-q">Кто? Что?</span>
+      </span>
+      <span class="sp-count" id="cnt-noun">0</span>
+    </button>
+    <button class="speech-btn sp-verb" onclick="matchAnswer('verb')">
+      <span class="sp-icon">⚡</span>
+      <span class="sp-text">
+        <span class="sp-name">Глагол</span>
+        <span class="sp-q">Что делает?</span>
+      </span>
+      <span class="sp-count" id="cnt-verb">0</span>
+    </button>
+    <button class="speech-btn sp-adj" onclick="matchAnswer('adj')">
+      <span class="sp-icon">🎨</span>
+      <span class="sp-text">
+        <span class="sp-name">Прилагательное</span>
+        <span class="sp-q">Какой? Какая?</span>
+      </span>
+      <span class="sp-count" id="cnt-adj">0</span>
+    </button>
+    <button class="speech-btn sp-adverb" onclick="matchAnswer('adverb')">
+      <span class="sp-icon">🚀</span>
+      <span class="sp-text">
+        <span class="sp-name">Наречие</span>
+        <span class="sp-q">Как? Где? Когда?</span>
+      </span>
+      <span class="sp-count" id="cnt-adverb">0</span>
+    </button>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div class="screen" id="results">
+  <div class="result-emoji" id="resultEmoji">🏆</div>
+  <div class="result-title" id="resultTitle"></div>
+  <div class="result-score" id="resultScore"></div>
+  <div class="result-msg" id="resultMsg"></div>
+  <div class="result-btns">
+    <button class="res-btn primary" onclick="playAgain()">Ещё раз 🔄</button>
+    <button class="res-btn secondary" onclick="goMenu()">Меню 🏠</button>
+  </div>
+</div>
+
+<script>
+// ===== AUDIO =====
+let audioCtx=null, musicOn=true, bgTimer=null;
+const bgNotes=[261,294,330,349,392,349,330,294];
+let bgIdx=0;
+
+function getCtx(){
+  if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+  return audioCtx;
+}
+function tone(freq,dur,type='sine',vol=0.3){
+  try{const c=getCtx(),o=c.createOscillator(),g=c.createGain();
+  o.connect(g);g.connect(c.destination);o.type=type;o.frequency.value=freq;
+  g.gain.setValueAtTime(vol,c.currentTime);g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+dur);
+  o.start();o.stop(c.currentTime+dur);}catch(e){}
+}
+function playCorrect(){tone(523,.12,'sine',.3);setTimeout(()=>tone(659,.12,'sine',.3),100);setTimeout(()=>tone(784,.25,'sine',.35),200);}
+function playWrong(){tone(300,.08,'sawtooth',.2);setTimeout(()=>tone(250,.2,'sawtooth',.2),80);}
+function playClick(){tone(440,.08,'sine',.15);}
+function playSelect(){tone(600,.1,'sine',.2);}
+function playWin(){[523,587,659,698,784,880,988,1047].forEach((f,i)=>setTimeout(()=>tone(f,.18,'sine',.3),i*80));}
+
+function bgNote(){
+  if(!musicOn)return;
+  try{const c=getCtx(),f=bgNotes[bgIdx%bgNotes.length],o=c.createOscillator(),g=c.createGain();
+  o.connect(g);g.connect(c.destination);o.type='triangle';o.frequency.value=f;
+  g.gain.setValueAtTime(.06,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.8);
+  o.start();o.stop(c.currentTime+.8);bgIdx++;}catch(e){}
+  bgTimer=setTimeout(bgNote,900);
+}
+function startBg(){stopBg();if(musicOn)bgNote();}
+function stopBg(){if(bgTimer)clearTimeout(bgTimer);}
+function toggleMusic(){musicOn=!musicOn;document.getElementById('musicBtn').textContent=musicOn?'🎵':'🔇';if(musicOn)startBg();else stopBg();playClick();}
+
+// CONFETTI
+const CC=['#fd79a8','#a29bfe','#fdcb6e','#55efc4','#74b9ff','#ff7675','#ffeaa7'];
+function confetti(){
+  const b=document.getElementById('confettiBox');
+  for(let i=0;i<80;i++)setTimeout(()=>{
+    const p=document.createElement('div');p.className='confetti-piece';
+    p.style.cssText=`left:${Math.random()*100}vw;background:${CC[Math.floor(Math.random()*CC.length)]};width:${6+Math.random()*10}px;height:${6+Math.random()*10}px;border-radius:${Math.random()>.5?'50%':'2px'};animation-duration:${1.5+Math.random()*2}s;animation-delay:${Math.random()*.5}s;`;
+    b.appendChild(p);setTimeout(()=>p.remove(),4000);
+  },i*25);
+}
+
+// TOAST
+let toastT=null;
+function toast(msg,type){
+  const t=document.getElementById('toast');
+  if(toastT)clearTimeout(toastT);
+  t.textContent=msg;t.className=`toast show ${type==='correct'?'correct-t':type==='wrong'?'wrong-t':'info-t'}`;
+  toastT=setTimeout(()=>t.classList.remove('show'),1500);
+}
+
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+function goMenu(){stopBg();playClick();showScreen('menu');startBg();}
+
+// ===== WORD POOL =====
+const wordPool={
+  noun:[
+    {w:'солнце'},{w:'дерево'},{w:'школа'},{w:'город'},{w:'зима'},
+    {w:'ребёнок'},{w:'река'},{w:'книга'},{w:'облако'},{w:'птица'},
+    {w:'мама'},{w:'кошка'},{w:'урок'},{w:'земля'},{w:'снег'},
+    {w:'стол'},{w:'окно'},{w:'небо'},{w:'лес'},{w:'дом'},
+  ],
+  verb:[
+    {w:'бежать'},{w:'прыгать'},{w:'читать'},{w:'рисовать'},{w:'петь'},
+    {w:'плыть'},{w:'смеяться'},{w:'думать'},{w:'играть'},{w:'лететь'},
+    {w:'писать'},{w:'строить'},{w:'кричать'},{w:'сидеть'},{w:'танцевать'},
+    {w:'спать'},{w:'есть'},{w:'бежать'},{w:'учить'},{w:'дружить'},
+  ],
+  adj:[
+    {w:'красивый'},{w:'синий'},{w:'мягкий'},{w:'весёлый'},{w:'добрый'},
+    {w:'зелёный'},{w:'большой'},{w:'умный'},{w:'белый'},{w:'быстрый'},
+    {w:'тёплый'},{w:'круглый'},{w:'сладкий'},{w:'старый'},{w:'новый'},
+    {w:'смелый'},{w:'грустный'},{w:'яркий'},{w:'тихий'},{w:'высокий'},
+  ],
+  adverb:[
+    {w:'быстро'},{w:'тихо'},{w:'вчера'},{w:'здесь'},{w:'громко'},
+    {w:'далеко'},{w:'весело'},{w:'сегодня'},{w:'высоко'},{w:'медленно'},
+    {w:'рядом'},{w:'утром'},{w:'очень'},{w:'везде'},{w:'снова'},
+    {w:'вместе'},{w:'всегда'},{w:'вечером'},{w:'нигде'},{w:'легко'},
+  ],
+};
+
+const typeInfo={
+  noun:{label:'Существительное',icon:'📦',color:'#fd79a8'},
+  verb:{label:'Глагол',icon:'⚡',color:'#a29bfe'},
+  adj:{label:'Прилагательное',icon:'🎨',color:'#fdcb6e'},
+  adverb:{label:'Наречие',icon:'🚀',color:'#55efc4'},
+};
+
+let lastPicked={noun:[],verb:[],adj:[],adverb:[]};
+function shuffle(a){return[...a].sort(()=>Math.random()-.5);}
+
+function pickWords(n){
+  const perCat=Math.ceil(n/4);
+  const res=[];
+  ['noun','verb','adj','adverb'].forEach(t=>{
+    let pool=wordPool[t].filter(w=>!lastPicked[t].includes(w.w));
+    if(pool.length<perCat)pool=wordPool[t];
+    const picked=shuffle(pool).slice(0,perCat);
+    lastPicked[t]=picked.map(w=>w.w);
+    picked.forEach(w=>res.push({word:w.w,type:t}));
+  });
+  return shuffle(res);
+}
+
+// ===== SORT =====
+let sortSel=null,sortOk=0,sortBad=0;
+function startSort(){
+  playClick();sortOk=0;sortBad=0;sortSel=null;
+  document.getElementById('sortCorrect').textContent=0;
+  document.getElementById('sortWrong').textContent=0;
+  ['noun','verb','adj','adverb'].forEach(t=>document.getElementById('basket-'+t).innerHTML='');
+  const words=pickWords(12);
+  const bank=document.getElementById('wordBank');bank.innerHTML='';
+  words.forEach(w=>{
+    const c=document.createElement('div');c.className='word-chip';c.textContent=w.word;
+    c.dataset.type=w.type;c.dataset.word=w.word;
+    c.onclick=()=>{playSelect();document.querySelectorAll('.word-chip').forEach(x=>x.classList.remove('selected-chip'));c.classList.add('selected-chip');sortSel=c;};
+    bank.appendChild(c);
+  });
+  showScreen('sortGame');startBg();
+}
+function dropWord(t){
+  if(!sortSel){toast('👆 Сначала выбери слово!','info');return;}
+  const w=sortSel.dataset.word,ct=sortSel.dataset.type;
+  if(ct===t){
+    sortOk++;document.getElementById('sortCorrect').textContent=sortOk;playCorrect();toast('✅ Верно!','correct');
+    const c=document.createElement('div');c.className='basket-chip';c.textContent=w;
+    c.onclick=()=>{
+      const nb=document.createElement('div');nb.className='word-chip';nb.textContent=w;nb.dataset.type=ct;nb.dataset.word=w;
+      nb.onclick=()=>{playSelect();document.querySelectorAll('.word-chip').forEach(x=>x.classList.remove('selected-chip'));nb.classList.add('selected-chip');sortSel=nb;};
+      document.getElementById('wordBank').appendChild(nb);
+      sortOk--;document.getElementById('sortCorrect').textContent=sortOk;c.remove();playClick();
+    };
+    document.getElementById('basket-'+t).appendChild(c);sortSel.remove();
+  } else {
+    sortBad++;document.getElementById('sortWrong').textContent=sortBad;playWrong();
+    toast(`❌ Это ${typeInfo[ct].icon} ${typeInfo[ct].label}`,'wrong');
+    sortSel.classList.remove('selected-chip');
+  }
+  sortSel=null;
+  if(document.getElementById('wordBank').children.length===0){
+    setTimeout(()=>{stopBg();currentGame='sort';showResult(sortOk,sortOk+sortBad,Math.round(sortOk/(sortOk+sortBad)*100));},700);
+  }
+}
+
+// ===== QUIZ =====
+let qWords=[],qIdx=0,qScore=0,currentGame='';
+function startQuiz(){
+  playClick();qWords=pickWords(12).slice(0,10);qIdx=0;qScore=0;
+  document.getElementById('quizScore').textContent=0;currentGame='quiz';
+  showScreen('quizGame');startBg();showQ();
+}
+function showQ(){
+  if(qIdx>=qWords.length){stopBg();showResult(qScore,qWords.length,Math.round(qScore/qWords.length*100));return;}
+  const q=qWords[qIdx];
+  const w=document.getElementById('quizWord');
+  w.textContent=q.word;w.classList.remove('pop');void w.offsetWidth;w.classList.add('pop');
+  document.getElementById('quizHint').textContent=`${typeInfo[q.type].icon} ${q.word} — ${typeInfo[q.type].label}`;
+  document.getElementById('quizNum').textContent=`Вопрос ${qIdx+1} из ${qWords.length}`;
+  document.getElementById('quizBar').style.width=(qIdx/qWords.length*100)+'%';
+  const opts=document.getElementById('quizOptions');opts.innerHTML='';
+  shuffle(['noun','verb','adj','adverb']).forEach(t=>{
+    const b=document.createElement('button');b.className='quiz-opt';
+    b.innerHTML=`<span class="opt-icon">${typeInfo[t].icon}</span>${typeInfo[t].label}`;
+    b.onclick=()=>{
+      document.querySelectorAll('.quiz-opt').forEach(x=>x.disabled=true);
+      if(t===q.type){b.classList.add('correct');qScore++;document.getElementById('quizScore').textContent=qScore;playCorrect();toast('✅ Правильно!','correct');}
+      else{b.classList.add('wrong');playWrong();toast(`❌ Правильно: ${typeInfo[q.type].icon} ${typeInfo[q.type].label}`,'wrong');
+        document.querySelectorAll('.quiz-opt').forEach(x=>{if(x.textContent.includes(typeInfo[q.type].label))x.classList.add('correct');});}
+      qIdx++;setTimeout(showQ,1300);
+    };
+    opts.appendChild(b);
+  });
+}
+
+// ===== MATCH — НОВЫЙ =====
+let matchWords=[], matchSel=null, matchDone=0, matchErrors=0;
+
+function startMatch(){
+  playClick();
+  matchSel=null; matchDone=0; matchErrors=0;
+  currentGame='match';
+
+  // 3 слова на каждую часть речи = 12 слов
+  matchWords = pickWords(12);
+
+  document.getElementById('matchDone').textContent=0;
+  document.getElementById('matchTotal').textContent=matchWords.length;
+  document.getElementById('matchInstruction').textContent='👆 Нажми слово, затем выбери его часть речи внизу';
+
+  // Счётчики обнуляем
+  ['noun','verb','adj','adverb'].forEach(t=>document.getElementById('cnt-'+t).textContent='0');
+
+  // Строим карточки слов
+  const grid=document.getElementById('wordsGrid');
+  grid.innerHTML='';
+  matchWords.forEach((w,i)=>{
+    const card=document.createElement('div');
+    card.className='word-card';
+    card.textContent=w.word;
+    card.dataset.idx=i;
+    card.dataset.type=w.type;
+    card.dataset.done='0';
+    card.onclick=()=>selectWord(card);
+    grid.appendChild(card);
+  });
+
+  showScreen('matchGame');
+  startBg();
+}
+
+function selectWord(card){
+  if(card.dataset.done==='1') return;
+  playSelect();
+  document.querySelectorAll('.word-card').forEach(c=>{
+    if(c.dataset.done==='0') c.classList.remove('selected-word');
+  });
+  card.classList.add('selected-word');
+  matchSel=card;
+  document.getElementById('matchInstruction').textContent=`"${card.textContent}" — какая часть речи?`;
+}
+
+function matchAnswer(type){
+  if(!matchSel){toast('👆 Сначала выбери слово!','info');return;}
+  const correct=matchSel.dataset.type;
+
+  if(type===correct){
+    // Верно
+    matchSel.classList.remove('selected-word');
+    matchSel.classList.add('done-'+correct);
+    matchSel.dataset.done='1';
+    matchSel.onclick=null;
+    matchDone++;
+    document.getElementById('matchDone').textContent=matchDone;
+
+    // Обновляем счётчик в кнопке
+    const cnt=document.getElementById('cnt-'+correct);
+    cnt.textContent=parseInt(cnt.textContent)+1;
+
+    playCorrect();
+    toast(`✅ Верно! ${typeInfo[correct].icon}`, 'correct');
+    matchSel=null;
+    document.getElementById('matchInstruction').textContent='👆 Выбери следующее слово';
+
+    if(matchDone===matchWords.length){
+      setTimeout(()=>{
+        stopBg();
+        const pct=Math.round(matchDone/(matchDone+matchErrors)*100);
+        showResult(matchDone,matchDone+matchErrors,pct);
+      },700);
+    }
+  } else {
+    // Ошибка
+    matchErrors++;
+    playWrong();
+    toast(`❌ Нет! Это ${typeInfo[correct].icon} ${typeInfo[correct].label}`,'wrong');
+    matchSel.classList.add('wrong-flash');
+    setTimeout(()=>matchSel&&matchSel.classList.remove('wrong-flash'),400);
+  }
+}
+
+// ===== RESULTS =====
+function showResult(ok,total,pct){
+  let emoji,title,msg;
+  if(pct===100){emoji='🏆';title='Блестяще!';msg='Все ответы верные! Настоящий знаток частей речи!';}
+  else if(pct>=80){emoji='⭐';title='Отлично!';msg='Очень хороший результат! Ещё немного — и будет 100%!';}
+  else if(pct>=60){emoji='👍';title='Хорошо!';msg='Неплохо! Повтори правила и попробуй снова.';}
+  else{emoji='💪';title='Не сдавайся!';msg='Повтори части речи и попробуй ещё раз. Всё получится!';}
+  document.getElementById('resultEmoji').textContent=emoji;
+  document.getElementById('resultTitle').textContent=title;
+  document.getElementById('resultScore').textContent=`${ok} из ${total} (${pct}%)`;
+  document.getElementById('resultMsg').textContent=msg;
+  if(pct>=80){confetti();playWin();}else tone(400,.5,'triangle',.2);
+  showScreen('results');
+}
+
+function playAgain(){
+  playClick();
+  if(currentGame==='sort')startSort();
+  else if(currentGame==='quiz')startQuiz();
+  else startMatch();
+}
+
+window.addEventListener('click',()=>{if(!audioCtx){getCtx();if(musicOn)startBg();}},{once:true});
+</script>
+</body>
+</html>

@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Russo+One&display=swap');
+
+  :root {
+    --green: #2d7a3a;
+    --green-light: #4caf50;
+    --gold: #f5c842;
+    --gold-dark: #d4a017;
+    --red: #e53935;
+    --blue: #1565c0;
+    --bg: #f0f4e8;
+    --panel: #fff9ed;
+    --shadow: rgba(0,0,0,0.18);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: linear-gradient(135deg, #e8f5e9 0%, #fff9c4 50%, #e3f2fd 100%);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* SHOP HEADER */
+  .shop-header {
+    background: linear-gradient(90deg, #1b5e20 0%, #2e7d32 40%, #388e3c 100%);
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    position: relative;
+    overflow: hidden;
+  }
+  .shop-header::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(
+      45deg, transparent, transparent 20px,
+      rgba(255,255,255,0.03) 20px, rgba(255,255,255,0.03) 40px
+    );
+  }
+  .shop-logo {
+    font-family: 'Russo One', sans-serif;
+    color: #fff;
+    font-size: 1.3rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 1;
+  }
+  .shop-logo span { font-size: 1.6rem; }
+  .shop-score {
+    background: rgba(255,255,255,0.15);
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 20px;
+    padding: 6px 18px;
+    color: #fff;
+    font-weight: 800;
+    font-size: 1rem;
+    z-index: 1;
+  }
+  .star { color: #ffd54f; }
+
+  /* TASK PANEL */
+  .task-panel {
+    margin: 16px auto;
+    max-width: 700px;
+    background: linear-gradient(135deg, #1565c0 0%, #0d47a1 100%);
+    border-radius: 20px;
+    padding: 18px 24px;
+    box-shadow: 0 6px 24px rgba(21,101,192,0.35);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    position: relative;
+    overflow: hidden;
+  }
+  .task-panel::after {
+    content: '🛒';
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 3rem;
+    opacity: 0.15;
+  }
+  .task-label {
+    color: #bbdefb;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .task-amount {
+    font-family: 'Russo One', sans-serif;
+    color: #ffd54f;
+    font-size: 2.4rem;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    line-height: 1;
+  }
+  .task-left { flex: 1; }
+  .task-btn {
+    background: linear-gradient(135deg, #ffd54f, #ffb300);
+    border: none;
+    border-radius: 14px;
+    padding: 10px 20px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 0.95rem;
+    cursor: pointer;
+    color: #1a1a1a;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    transition: transform .15s, box-shadow .15s;
+    white-space: nowrap;
+    z-index: 1;
+  }
+  .task-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.25); }
+  .task-btn:active { transform: translateY(0); }
+
+  /* CASHIER DISPLAY */
+  .cashier-display {
+    max-width: 700px;
+    margin: 0 auto 16px;
+    background: #1a1a1a;
+    border-radius: 16px;
+    padding: 14px 20px;
+    box-shadow: inset 0 2px 8px rgba(0,0,0,0.5), 0 4px 12px rgba(0,0,0,0.2);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .display-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .display-label {
+    color: #4caf50;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    opacity: 0.8;
+  }
+  .display-value {
+    font-family: 'Russo One', sans-serif;
+    color: #4caf50;
+    font-size: 1.5rem;
+    text-shadow: 0 0 10px rgba(76,175,80,0.6);
+    letter-spacing: 2px;
+  }
+  .display-value.target { color: #ffd54f; text-shadow: 0 0 10px rgba(255,213,79,0.6); }
+  .display-value.over { color: #ef5350; text-shadow: 0 0 10px rgba(239,83,80,0.6); }
+  .display-value.exact { color: #69f0ae; text-shadow: 0 0 10px rgba(105,240,174,0.6); }
+  .display-divider { border: none; border-top: 1px solid #333; margin: 2px 0; }
+  
+  .equation-display {
+    color: #ffcc02;
+    font-size: 0.9rem;
+    font-weight: 700;
+    font-family: 'Russo One', sans-serif;
+    letter-spacing: 1px;
+    text-shadow: 0 0 8px rgba(255,204,2,0.5);
+    min-height: 22px;
+    word-break: break-word;
+  }
+
+  /* PROGRESS BAR */
+  .progress-wrap {
+    max-width: 700px;
+    margin: 0 auto 16px;
+    background: rgba(0,0,0,0.1);
+    border-radius: 20px;
+    height: 14px;
+    overflow: hidden;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.15);
+  }
+  .progress-bar {
+    height: 100%;
+    border-radius: 20px;
+    background: linear-gradient(90deg, #43a047, #76ff03);
+    transition: width 0.4s cubic-bezier(.34,1.56,.64,1);
+    position: relative;
+    overflow: hidden;
+  }
+  .progress-bar::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%; right: 0; bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    animation: shimmer 1.5s infinite;
+  }
+  @keyframes shimmer { to { left: 100%; } }
+  .progress-bar.over { background: linear-gradient(90deg, #e53935, #ff6b6b); }
+  .progress-bar.exact { background: linear-gradient(90deg, #00c853, #69f0ae); }
+
+  /* SECTION TITLE */
+  .section-title {
+    max-width: 700px;
+    margin: 0 auto 10px;
+    font-weight: 800;
+    font-size: 1rem;
+    color: #33691e;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 4px;
+  }
+
+  /* BANKNOTES GRID */
+  .bills-grid {
+    max-width: 700px;
+    margin: 0 auto 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 12px;
+    padding: 0 4px;
+  }
+
+  .bill-card {
+    border-radius: 14px;
+    padding: 0;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: transform .18s cubic-bezier(.34,1.56,.64,1), box-shadow .18s;
+    user-select: none;
+    box-shadow: 0 4px 14px var(--shadow);
+    aspect-ratio: 2/1;
+    min-height: 75px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .bill-card:hover { transform: translateY(-4px) scale(1.04); box-shadow: 0 10px 28px rgba(0,0,0,0.25); }
+  .bill-card:active { transform: scale(0.96); }
+
+  /* Bill colors by denomination */
+  .bill-200  { background: linear-gradient(135deg, #6a1b9a 0%, #9c27b0 50%, #7b1fa2 100%); }
+  .bill-500  { background: linear-gradient(135deg, #1565c0 0%, #1976d2 50%, #0d47a1 100%); }
+  .bill-1000 { background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 50%, #388e3c 100%); }
+  .bill-2000 { background: linear-gradient(135deg, #bf360c 0%, #e64a19 50%, #d84315 100%); }
+  .bill-5000 { background: linear-gradient(135deg, #880e4f 0%, #ad1457 50%, #c2185b 100%); }
+  .bill-10000 { background: linear-gradient(135deg, #e65100 0%, #f57c00 50%, #ef6c00 100%); }
+  .bill-20000 { background: linear-gradient(135deg, #004d40 0%, #00695c 50%, #00796b 100%); }
+
+  /* Bill inner design */
+  .bill-inner {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+  }
+  .bill-inner::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      -45deg, transparent, transparent 8px,
+      rgba(255,255,255,0.04) 8px, rgba(255,255,255,0.04) 16px
+    );
+  }
+  .bill-inner::after {
+    content: '₸';
+    position: absolute;
+    right: 6px;
+    bottom: 2px;
+    font-size: 2rem;
+    color: rgba(255,255,255,0.1);
+    font-family: 'Russo One', sans-serif;
+  }
+  .bill-oval {
+    position: absolute;
+    width: 80px;
+    height: 50px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.15);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  .bill-value {
+    font-family: 'Russo One', sans-serif;
+    color: #fff;
+    font-size: 1.2rem;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.4);
+    position: relative;
+    z-index: 1;
+    line-height: 1;
+  }
+  .bill-unit {
+    font-size: 0.65rem;
+    color: rgba(255,255,255,0.75);
+    font-weight: 700;
+    letter-spacing: 1px;
+    position: relative;
+    z-index: 1;
+    margin-top: 2px;
+  }
+  .bill-corner {
+    position: absolute;
+    top: 5px;
+    left: 8px;
+    font-size: 0.6rem;
+    color: rgba(255,255,255,0.5);
+    font-weight: 800;
+    letter-spacing: 0.5px;
+  }
+  .bill-star {
+    position: absolute;
+    top: 4px;
+    right: 7px;
+    font-size: 0.55rem;
+    color: rgba(255,255,255,0.4);
+  }
+
+  .bill-click-fx {
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.25);
+    border-radius: 14px;
+    opacity: 0;
+    animation: clickfx .35s ease-out forwards;
+    pointer-events: none;
+  }
+  @keyframes clickfx { from { opacity: 0.5; transform: scale(0.9); } to { opacity: 0; transform: scale(1.1); } }
+
+  /* SELECTED BILLS TRAY */
+  .tray-section {
+    max-width: 700px;
+    margin: 0 auto 16px;
+  }
+  .tray-title {
+    font-weight: 800;
+    font-size: 1rem;
+    color: #33691e;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    padding: 0 4px;
+  }
+  .tray {
+    background: rgba(255,255,255,0.6);
+    backdrop-filter: blur(6px);
+    border: 2px dashed #a5d6a7;
+    border-radius: 16px;
+    min-height: 60px;
+    padding: 10px 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+  }
+  .tray-empty {
+    color: #b0bec5;
+    font-size: 0.9rem;
+    font-weight: 700;
+    width: 100%;
+    text-align: center;
+  }
+  .tray-chip {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: #fff;
+    border-radius: 10px;
+    padding: 4px 10px;
+    font-weight: 800;
+    font-size: 0.85rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    cursor: pointer;
+    transition: transform .15s;
+    color: #1a1a1a;
+    border: 2px solid;
+    animation: popIn .2s cubic-bezier(.34,1.56,.64,1);
+  }
+  @keyframes popIn { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .tray-chip:hover { transform: scale(1.08); }
+  .tray-chip .chip-remove { color: #ef5350; font-size: 0.75rem; margin-left: 2px; }
+
+  /* ACTION BUTTONS */
+  .action-row {
+    max-width: 700px;
+    margin: 0 auto 20px;
+    display: flex;
+    gap: 10px;
+    padding: 0 4px;
+  }
+  .btn-check {
+    flex: 2;
+    background: linear-gradient(135deg, #2e7d32, #43a047);
+    color: #fff;
+    border: none;
+    border-radius: 14px;
+    padding: 14px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 1.1rem;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(46,125,50,0.4);
+    transition: transform .15s, box-shadow .15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .btn-check:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(46,125,50,0.5); }
+  .btn-clear {
+    flex: 1;
+    background: linear-gradient(135deg, #e53935, #ef5350);
+    color: #fff;
+    border: none;
+    border-radius: 14px;
+    padding: 14px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 1rem;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(229,57,53,0.3);
+    transition: transform .15s;
+  }
+  .btn-clear:hover { transform: translateY(-2px); }
+
+  /* RESULT OVERLAY */
+  .result-overlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .3s;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(4px);
+  }
+  .result-overlay.show { opacity: 1; pointer-events: all; }
+  .result-box {
+    background: #fff;
+    border-radius: 28px;
+    padding: 32px 40px;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    max-width: 380px;
+    width: 90%;
+    transform: scale(0.7);
+    transition: transform .4s cubic-bezier(.34,1.56,.64,1);
+  }
+  .result-overlay.show .result-box { transform: scale(1); }
+  .result-emoji { font-size: 4rem; margin-bottom: 12px; display: block; }
+  .result-title { font-family: 'Russo One', sans-serif; font-size: 1.8rem; margin-bottom: 8px; }
+  .result-title.success { color: #2e7d32; }
+  .result-title.fail { color: #e53935; }
+  .result-subtitle { color: #666; font-size: 1rem; font-weight: 700; margin-bottom: 20px; }
+  .result-equation {
+    background: #f5f5f5;
+    border-radius: 12px;
+    padding: 12px;
+    font-family: 'Russo One', sans-serif;
+    font-size: 0.95rem;
+    color: #333;
+    margin-bottom: 20px;
+    word-break: break-word;
+  }
+  .btn-next {
+    background: linear-gradient(135deg, #1565c0, #1976d2);
+    color: #fff;
+    border: none;
+    border-radius: 14px;
+    padding: 14px 32px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 1.1rem;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(21,101,192,0.4);
+    transition: transform .15s;
+  }
+  .btn-next:hover { transform: translateY(-2px); }
+
+  /* CONFETTI */
+  .confetti-piece {
+    position: fixed;
+    width: 12px;
+    height: 12px;
+    top: -20px;
+    border-radius: 2px;
+    animation: confettiFall linear forwards;
+    z-index: 1000;
+    pointer-events: none;
+  }
+  @keyframes confettiFall {
+    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: #1a1a1a;
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    z-index: 999;
+    transition: transform .3s cubic-bezier(.34,1.56,.64,1);
+    pointer-events: none;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* Mobile */
+  @media (max-width: 500px) {
+    .bills-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .task-amount { font-size: 1.8rem; }
+    .bill-value { font-size: 1rem; }
+    .shop-logo { font-size: 1rem; }
+  }
+
+  .main-wrap { padding: 0 12px 30px; }
+</style>
+</head>
+<body>
+
+<div class="shop-header">
+  <div class="shop-logo"><span>🏪</span> Магазин «ТENGE»</div>
+  <div class="shop-score">⭐ Очки: <span id="scoreVal">0</span></div>
+</div>
+
+<div class="main-wrap">
+
+  <!-- TASK -->
+  <div class="task-panel" style="margin-top:14px;">
+    <div class="task-left">
+      <div class="task-label">🎯 Задание</div>
+      <div style="color:#fff; font-size:1rem; font-weight:700; margin:2px 0;">Набери сумму:</div>
+      <div class="task-amount" id="taskAmount">5 000 ₸</div>
+    </div>
+    <button class="task-btn" onclick="newTask()">🔀 Новое<br>задание</button>
+  </div>
+
+  <!-- CASHIER DISPLAY -->
+  <div class="cashier-display">
+    <div class="display-row">
+      <span class="display-label">НУЖНО</span>
+      <span class="display-value target" id="dispTarget">5 000 ₸</span>
+    </div>
+    <hr class="display-divider">
+    <div class="display-row">
+      <span class="display-label">НАБРАНО</span>
+      <span class="display-value" id="dispCurrent">0 ₸</span>
+    </div>
+    <hr class="display-divider">
+    <div class="equation-display" id="equationDisp">Нажимай на купюры ↓</div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="progress-wrap">
+    <div class="progress-bar" id="progressBar" style="width:0%"></div>
+  </div>
+
+  <!-- BILLS -->
+  <div class="section-title">💵 Купюры — нажимай, чтобы добавить:</div>
+  <div class="bills-grid" id="billsGrid"></div>
+
+  <!-- TRAY -->
+  <div class="tray-section">
+    <div class="tray-title">🧾 Касса (нажми на купюру, чтобы убрать):</div>
+    <div class="tray" id="tray"><span class="tray-empty">Здесь появятся выбранные купюры</span></div>
+  </div>
+
+  <!-- ACTIONS -->
+  <div class="action-row">
+    <button class="btn-check" onclick="checkAnswer()">✅ Проверить ответ</button>
+    <button class="btn-clear" onclick="clearTray()">🗑 Очистить</button>
+  </div>
+
+</div>
+
+<!-- RESULT OVERLAY -->
+<div class="result-overlay" id="resultOverlay">
+  <div class="result-box">
+    <span class="result-emoji" id="resultEmoji">🎉</span>
+    <div class="result-title" id="resultTitle">Правильно!</div>
+    <div class="result-subtitle" id="resultSubtitle">Молодец!</div>
+    <div class="result-equation" id="resultEquation"></div>
+    <button class="btn-next" onclick="nextTask()">▶ Следующее задание</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── STATE ───────────────────────────────────────────────────
+const BILLS = [200, 500, 1000, 2000, 5000, 10000, 20000];
+const TASKS = [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000];
+const COLORS = {
+  200: '#7b1fa2', 500: '#1565c0', 1000: '#2e7d32',
+  2000: '#bf360c', 5000: '#880e4f', 10000: '#e65100', 20000: '#004d40'
+};
+
+let target = 5000;
+let selected = []; // array of bill values
+let score = 0;
+let audioCtx = null;
+
+// ─── AUDIO ────────────────────────────────────────────────────
+function getAudio() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+function playTone(freq, dur, type='sine', vol=0.3) {
+  try {
+    const ctx = getAudio();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = type; osc.frequency.setValueAtTime(freq, ctx.currentTime);
+    gain.gain.setValueAtTime(vol, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
+    osc.start(); osc.stop(ctx.currentTime + dur);
+  } catch(e) {}
+}
+function playClick() { playTone(520, 0.08, 'square', 0.15); }
+function playAdd()   { playTone(660, 0.12, 'sine', 0.2); }
+function playRemove(){ playTone(300, 0.1, 'sine', 0.15); }
+function playWin() {
+  const melody = [523,659,784,1047];
+  melody.forEach((f, i) => {
+    setTimeout(() => playTone(f, 0.25, 'sine', 0.25), i*120);
+  });
+}
+function playFail() {
+  playTone(220, 0.3, 'sawtooth', 0.2);
+  setTimeout(() => playTone(180, 0.4, 'sawtooth', 0.2), 150);
+}
+function playOver() { playTone(350, 0.15, 'square', 0.2); }
+
+// ─── FORMAT ──────────────────────────────────────────────────
+function fmt(n) {
+  return n.toLocaleString('ru-RU') + ' ₸';
+}
+
+// ─── RENDER BILLS ─────────────────────────────────────────────
+function renderBills() {
+  const grid = document.getElementById('billsGrid');
+  grid.innerHTML = '';
+  BILLS.forEach(b => {
+    const card = document.createElement('div');
+    card.className = `bill-card bill-${b}`;
+    const display = b >= 1000 ? (b/1000) + ' 000' : b;
+    card.innerHTML = `
+      <div class="bill-inner">
+        <div class="bill-oval"></div>
+        <div class="bill-corner">KZ</div>
+        <div class="bill-star">★ ★ ★</div>
+        <div class="bill-value">${display}</div>
+        <div class="bill-unit">ТЕҢГЕ</div>
+      </div>
+    `;
+    card.addEventListener('click', () => addBill(b, card));
+    grid.appendChild(card);
+  });
+}
+
+// ─── ADD / REMOVE BILL ────────────────────────────────────────
+function addBill(val, card) {
+  playAdd();
+  selected.push(val);
+  // click effect
+  const fx = document.createElement('div');
+  fx.className = 'bill-click-fx';
+  card.appendChild(fx);
+  setTimeout(() => fx.remove(), 350);
+  updateUI();
+}
+
+function removeBill(idx) {
+  playRemove();
+  selected.splice(idx, 1);
+  updateUI();
+}
+
+function clearTray() {
+  if (!selected.length) return;
+  playRemove();
+  selected = [];
+  updateUI();
+}
+
+// ─── UPDATE UI ────────────────────────────────────────────────
+function updateUI() {
+  const total = selected.reduce((a, b) => a + b, 0);
+  const dispCur = document.getElementById('dispCurrent');
+  const prog = document.getElementById('progressBar');
+  const eq = document.getElementById('equationDisp');
+
+  dispCur.textContent = fmt(total);
+  dispCur.className = 'display-value';
+  prog.className = 'progress-bar';
+
+  const pct = Math.min((total / target) * 100, 100);
+  prog.style.width = pct + '%';
+
+  if (total > target) {
+    dispCur.classList.add('over');
+    prog.classList.add('over');
+  } else if (total === target) {
+    dispCur.classList.add('exact');
+    prog.classList.add('exact');
+  }
+
+  // Equation
+  if (selected.length === 0) {
+    eq.textContent = 'Нажимай на купюры ↓';
+  } else {
+    const parts = selected.map(v => fmt(v));
+    eq.textContent = fmt(target) + ' = ' + parts.join(' + ');
+  }
+
+  // Tray
+  const tray = document.getElementById('tray');
+  if (selected.length === 0) {
+    tray.innerHTML = '<span class="tray-empty">Здесь появятся выбранные купюры</span>';
+  } else {
+    tray.innerHTML = '';
+    // group by denomination
+    const counts = {};
+    selected.forEach((v, idx) => {
+      if (!counts[v]) counts[v] = [];
+      counts[v].push(idx);
+    });
+    selected.forEach((v, idx) => {
+      const chip = document.createElement('div');
+      chip.className = 'tray-chip';
+      chip.style.borderColor = COLORS[v] || '#999';
+      chip.style.color = COLORS[v] || '#333';
+      chip.innerHTML = `${fmt(v)} <span class="chip-remove">✕</span>`;
+      chip.addEventListener('click', () => removeBill(idx));
+      tray.appendChild(chip);
+    });
+  }
+}
+
+// ─── CHECK ANSWER ─────────────────────────────────────────────
+function checkAnswer() {
+  if (selected.length === 0) { showToast('Выбери хотя бы одну купюру! 💡'); return; }
+  const total = selected.reduce((a, b) => a + b, 0);
+
+  if (total === target) {
+    playWin();
+    score += 10;
+    document.getElementById('scoreVal').textContent = score;
+    const parts = selected.map(v => fmt(v));
+    const eqText = fmt(target) + ' = ' + parts.join(' + ');
+    showResult(true, eqText);
+    spawnConfetti();
+  } else if (total > target) {
+    playFail();
+    showResult(false, `Ты набрал ${fmt(total)}, это больше чем ${fmt(target)} на ${fmt(total-target)}`);
+  } else {
+    playFail();
+    showResult(false, `Не хватает ещё ${fmt(target - total)}. Попробуй ещё раз!`);
+  }
+}
+
+// ─── RESULT OVERLAY ───────────────────────────────────────────
+function showResult(success, msg) {
+  const ov = document.getElementById('resultOverlay');
+  document.getElementById('resultEmoji').textContent = success ? ['🎉','🌟','🏆','✨'][Math.floor(Math.random()*4)] : ['😅','🤔','💪','📚'][Math.floor(Math.random()*4)];
+  document.getElementById('resultTitle').textContent = success ? 'Правильно!' : 'Не совсем...';
+  document.getElementById('resultTitle').className = 'result-title ' + (success ? 'success' : 'fail');
+  document.getElementById('resultSubtitle').textContent = success ? 'Отличная работа! +10 очков ⭐' : 'Попробуй ещё раз!';
+  document.getElementById('resultEquation').textContent = msg;
+  ov.classList.add('show');
+}
+
+function nextTask() {
+  document.getElementById('resultOverlay').classList.remove('show');
+  selected = [];
+  newTask();
+}
+
+// ─── NEW TASK ─────────────────────────────────────────────────
+function newTask() {
+  playClick();
+  selected = [];
+  const pool = TASKS.filter(t => t !== target);
+  target = pool[Math.floor(Math.random() * pool.length)];
+  document.getElementById('taskAmount').textContent = fmt(target);
+  document.getElementById('dispTarget').textContent = fmt(target);
+  updateUI();
+}
+
+// ─── TOAST ────────────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+// ─── CONFETTI ─────────────────────────────────────────────────
+function spawnConfetti() {
+  const colors = ['#ffd54f','#ef5350','#42a5f5','#66bb6a','#ab47bc','#ff7043'];
+  for (let i = 0; i < 60; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'confetti-piece';
+      el.style.left = Math.random() * 100 + 'vw';
+      el.style.background = colors[Math.floor(Math.random()*colors.length)];
+      el.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+      el.style.width = (8 + Math.random()*10) + 'px';
+      el.style.height = (8 + Math.random()*10) + 'px';
+      el.style.animationDuration = (1.5 + Math.random()*2) + 's';
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 4000);
+    }, i * 30);
+  }
+}
+
+// ─── INIT ─────────────────────────────────────────────────────
+renderBills();
+updateUI();
+</script>
+</body>
+</html>

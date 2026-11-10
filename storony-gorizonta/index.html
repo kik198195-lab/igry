@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Стороны горизонта — Игра для 2 класса</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Nunito',sans-serif;background:linear-gradient(135deg,#e8f5e9 0%,#f1f8e9 50%,#e3f2fd 100%);min-height:100vh;padding:16px}
+  .game{max-width:680px;margin:0 auto}
+
+  /* HEADER */
+  .hdr{background:linear-gradient(135deg,#1b5e20,#2e7d32,#388e3c);border-radius:20px;padding:18px 22px;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;box-shadow:0 6px 24px rgba(46,125,50,0.35)}
+  .hdr-left{display:flex;align-items:center;gap:12px}
+  .hdr-icon{width:48px;height:48px;background:rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px}
+  .hdr-title{color:#fff;font-size:18px;font-weight:900;letter-spacing:0.3px;text-shadow:0 1px 3px rgba(0,0,0,0.2)}
+  .hdr-sub{color:rgba(255,255,255,0.8);font-size:12px;font-weight:600;margin-top:2px}
+  .score-box{display:flex;gap:10px}
+  .sc{background:rgba(255,255,255,0.18);border:1px solid rgba(255,255,255,0.3);border-radius:12px;padding:8px 14px;color:#fff;font-size:12px;font-weight:600;text-align:center;min-width:60px}
+  .sc span{display:block;font-size:22px;font-weight:900;line-height:1}
+
+  /* PROGRESS */
+  .prog-wrap{margin-bottom:14px}
+  .prog-label{font-size:12px;color:#388e3c;font-weight:700;margin-bottom:6px;text-align:right}
+  .progress{height:10px;background:#c8e6c9;border-radius:5px;overflow:hidden}
+  .progress-bar{height:100%;background:linear-gradient(90deg,#43a047,#66bb6a);border-radius:5px;transition:width 0.4s ease}
+
+  /* STAGE NAV */
+  .stage-nav{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+  .stage-btn{padding:7px 16px;border-radius:20px;border:2px solid #a5d6a7;background:#fff;color:#388e3c;font-size:12px;font-weight:700;cursor:default;transition:all 0.2s;font-family:'Nunito',sans-serif}
+  .stage-btn.active{background:linear-gradient(135deg,#2e7d32,#43a047);color:#fff;border-color:#2e7d32;box-shadow:0 3px 10px rgba(46,125,50,0.4)}
+  .stage-btn.done{background:#e8f5e9;color:#2e7d32;border-color:#66bb6a}
+
+  /* PANEL */
+  .panel{background:#fff;border-radius:18px;padding:20px;margin-bottom:14px;box-shadow:0 3px 16px rgba(0,0,0,0.08)}
+  .q-num{display:inline-block;background:linear-gradient(135deg,#2e7d32,#43a047);color:#fff;border-radius:20px;padding:3px 14px;font-size:12px;font-weight:800;margin-bottom:10px}
+  .q-text{font-size:16px;font-weight:700;color:#1b5e20;margin-bottom:16px;line-height:1.5}
+
+  /* OPTIONS */
+  .opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .opt{padding:14px 12px;border-radius:12px;border:2.5px solid #c8e6c9;background:#f9fff9;color:#2e7d32;font-size:15px;font-weight:700;cursor:pointer;text-align:center;transition:all 0.15s;font-family:'Nunito',sans-serif}
+  .opt:hover{border-color:#2e7d32;background:#e8f5e9;transform:translateY(-2px);box-shadow:0 4px 12px rgba(46,125,50,0.2)}
+  .opt.correct{background:linear-gradient(135deg,#c8e6c9,#a5d6a7);border-color:#2e7d32;color:#1b5e20;pointer-events:none}
+  .opt.wrong{background:linear-gradient(135deg,#ffcdd2,#ef9a9a);border-color:#e53935;color:#b71c1c;pointer-events:none}
+  .opt.disabled{pointer-events:none;opacity:0.4}
+
+  /* FEEDBACK */
+  .feedback{border-radius:12px;padding:12px 16px;margin-top:12px;font-size:14px;font-weight:700;display:none}
+  .feedback.show{display:block}
+  .feedback.ok{background:linear-gradient(135deg,#e8f5e9,#f1f8e9);color:#1b5e20;border:2px solid #a5d6a7}
+  .feedback.err{background:linear-gradient(135deg,#ffebee,#fce4ec);color:#b71c1c;border:2px solid #ef9a9a}
+  .next-btn{display:none;margin-top:14px;padding:12px 28px;background:linear-gradient(135deg,#2e7d32,#43a047);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:800;cursor:pointer;width:100%;font-family:'Nunito',sans-serif;box-shadow:0 4px 14px rgba(46,125,50,0.4);transition:transform 0.15s}
+  .next-btn:hover{transform:translateY(-2px)}
+  .next-btn.show{display:block}
+
+  /* COMPASS */
+  .compass-game{display:flex;flex-direction:column;align-items:center;gap:16px}
+  .word-palette{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;background:#f1f8e9;border-radius:14px;padding:12px}
+  .drag-word{padding:10px 22px;border-radius:10px;border:2.5px solid #66bb6a;background:#fff;color:#1b5e20;font-size:15px;font-weight:800;cursor:pointer;transition:all 0.2s;font-family:'Nunito',sans-serif}
+  .drag-word:hover{background:#e8f5e9;transform:scale(1.05)}
+  .drag-word.used{opacity:0.25;pointer-events:none}
+  .drag-word.selected{background:linear-gradient(135deg,#2e7d32,#43a047);color:#fff;border-color:#1b5e20;box-shadow:0 4px 12px rgba(46,125,50,0.4)}
+
+  /* MATCH */
+  .match-area{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .match-col{display:flex;flex-direction:column;gap:8px}
+  .match-item{padding:12px 16px;border-radius:12px;border:2.5px solid #c8e6c9;background:#f9fff9;font-size:15px;font-weight:700;color:#2e7d32;cursor:pointer;text-align:center;transition:all 0.2s;font-family:'Nunito',sans-serif}
+  .match-item:hover{border-color:#2e7d32;background:#e8f5e9;transform:scale(1.03)}
+  .match-item.selected{background:linear-gradient(135deg,#e8f5e9,#c8e6c9);border-color:#2e7d32;box-shadow:0 3px 10px rgba(46,125,50,0.25)}
+  .match-item.matched{background:linear-gradient(135deg,#c8e6c9,#a5d6a7);border-color:#2e7d32;color:#1b5e20;pointer-events:none}
+  .match-item.wrong-match{background:linear-gradient(135deg,#ffcdd2,#ef9a9a);border-color:#e53935;color:#b71c1c}
+
+  /* SUN SCENES */
+  .sun-scene{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:14px}
+  .sun-card{border:3px solid #c8e6c9;border-radius:14px;padding:10px;text-align:center;cursor:pointer;transition:all 0.2s;background:#f9fff9;width:100px}
+  .sun-card:hover{border-color:#2e7d32;background:#e8f5e9;transform:translateY(-3px);box-shadow:0 6px 16px rgba(46,125,50,0.2)}
+  .sun-card.selected{border-color:#2e7d32;background:#e8f5e9;transform:translateY(-3px);box-shadow:0 6px 16px rgba(46,125,50,0.3)}
+  .sun-card.correct{border-color:#2e7d32;background:linear-gradient(135deg,#c8e6c9,#e8f5e9);pointer-events:none}
+  .sun-card.wrong{border-color:#e53935;background:linear-gradient(135deg,#ffcdd2,#ffebee);pointer-events:none}
+  .sun-label{font-size:10px;color:#555;margin-top:5px;font-weight:600;line-height:1.3}
+
+  /* RESULT */
+  .result-panel{background:#fff;border-radius:20px;padding:36px 24px;text-align:center;box-shadow:0 6px 24px rgba(0,0,0,0.1)}
+  .result-emoji{font-size:64px;margin-bottom:12px;display:block}
+  .result-title{font-size:22px;font-weight:900;color:#1b5e20;margin-bottom:8px}
+  .result-sub{font-size:14px;color:#666;margin-bottom:18px}
+  .result-stars{font-size:36px;letter-spacing:6px;margin-bottom:10px}
+  .score-big{font-size:48px;font-weight:900;color:#2e7d32;margin-bottom:6px}
+  .score-max{font-size:14px;color:#888;margin-bottom:20px}
+  .restart-btn{padding:14px 40px;background:linear-gradient(135deg,#2e7d32,#43a047);color:#fff;border:none;border-radius:14px;font-size:16px;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;box-shadow:0 5px 18px rgba(46,125,50,0.45);transition:transform 0.15s}
+  .restart-btn:hover{transform:translateY(-2px)}
+
+  /* DECORATIVE */
+  .confetti-strip{display:flex;gap:4px;justify-content:center;margin-bottom:8px}
+  .dot{width:10px;height:10px;border-radius:50%}
+
+  @media(max-width:480px){
+    .opts{grid-template-columns:1fr}
+    .match-area{grid-template-columns:1fr 1fr}
+    .hdr-title{font-size:15px}
+    .sc span{font-size:18px}
+  }
+</style>
+</head>
+<body>
+<div class="game" id="app"></div>
+
+<script>
+const STAGES=[{id:'quiz',label:'Вопросы',icon:'❓'},{id:'compass',label:'Компас',icon:'🧭'},{id:'match',label:'Соответствие',icon:'🔗'},{id:'sun',label:'Солнце',icon:'☀️'},{id:'result',label:'Итог',icon:'🏆'}];
+
+const QUIZ=[
+  {q:'Сколько основных сторон горизонта?',opts:['2','3','4','6'],ans:2},
+  {q:'На какой стороне горизонта восходит солнце?',opts:['Север','Запад','Юг','Восток'],ans:3},
+  {q:'На какой стороне горизонта заходит солнце?',opts:['Север','Запад','Юг','Восток'],ans:1},
+  {q:'Как называется прибор для определения сторон горизонта?',opts:['Термометр','Компас','Линейка','Весы'],ans:1},
+  {q:'Если стоишь лицом на Север, что у тебя за спиной?',opts:['Восток','Запад','Юг','Север'],ans:2},
+  {q:'Если стоишь лицом на Север, что у тебя справа?',opts:['Юг','Север','Запад','Восток'],ans:3},
+  {q:'Какой буквой обозначают Север на компасе?',opts:['Ю','В','С','З'],ans:2},
+  {q:'В полдень солнце находится на стороне:',opts:['Север','Восток','Юг','Запад'],ans:2},
+];
+
+const COMPASS_POSITIONS={
+  top:{word:'Север',x:76,y:2},
+  bottom:{word:'Юг',x:76,y:190},
+  left:{word:'Запад',x:2,y:98},
+  right:{word:'Восток',x:152,y:98},
+};
+
+const MATCH_LEFT=['Север','Юг','Запад','Восток'];
+const MATCH_RIGHT=['С','Ю','З','В'];
+const MATCH_PAIRS={0:0,1:1,2:2,3:3};
+
+const SUN_SCENES=[
+  {label:'Солнце восходит утром',answer:'Восток',
+   svg:`<svg width="80" height="60" viewBox="0 0 80 60" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="38" width="80" height="22" fill="#c8e6c9"/><rect x="0" y="0" width="80" height="42" fill="#e3f2fd"/><ellipse cx="40" cy="40" rx="14" ry="14" fill="#fbc02d"/><rect x="0" y="40" width="80" height="3" fill="#81c784"/><line x1="40" y1="22" x2="40" y2="16" stroke="#fbc02d" stroke-width="2" stroke-linecap="round"/><line x1="52" y1="28" x2="56" y2="24" stroke="#fbc02d" stroke-width="2" stroke-linecap="round"/><line x1="28" y1="28" x2="24" y2="24" stroke="#fbc02d" stroke-width="2" stroke-linecap="round"/></svg>`},
+  {label:'Солнце высоко в небе',answer:'Юг',
+   svg:`<svg width="80" height="60" viewBox="0 0 80 60" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="38" width="80" height="22" fill="#c8e6c9"/><rect x="0" y="0" width="80" height="42" fill="#bbdefb"/><circle cx="40" cy="18" r="13" fill="#fdd835"/><rect x="0" y="40" width="80" height="3" fill="#81c784"/><line x1="40" y1="2" x2="40" y2="0" stroke="#fdd835" stroke-width="2"/><line x1="58" y1="6" x2="62" y2="3" stroke="#fdd835" stroke-width="2"/><line x1="22" y1="6" x2="18" y2="3" stroke="#fdd835" stroke-width="2"/><line x1="67" y1="18" x2="72" y2="18" stroke="#fdd835" stroke-width="2"/><line x1="13" y1="18" x2="8" y2="18" stroke="#fdd835" stroke-width="2"/></svg>`},
+  {label:'Солнце заходит вечером',answer:'Запад',
+   svg:`<svg width="80" height="60" viewBox="0 0 80 60" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="38" width="80" height="22" fill="#c8e6c9"/><rect x="0" y="0" width="80" height="42" fill="#fce4ec"/><ellipse cx="40" cy="40" rx="14" ry="14" fill="#ff7043"/><rect x="0" y="40" width="80" height="3" fill="#81c784"/></svg>`},
+];
+
+let state={stage:0,score:0,total:0,quizIdx:0,quizAnswered:false,compassFills:{top:null,bottom:null,left:null,right:null},compassDragging:null,matchLeft:null,matchPairs:{},matchDone:false,sunAnswers:{},sunSelected:null};
+
+const MAX_SCORE=QUIZ.length*2+8+6;
+const MAX_TOTAL=QUIZ.length+4+3;
+
+function render(){
+  const app=document.getElementById('app');
+  const stageId=STAGES[state.stage].id;
+  let h='';
+
+  h+=`<div class="hdr">
+    <div class="hdr-left">
+      <div class="hdr-icon">🌍</div>
+      <div><div class="hdr-title">Стороны горизонта</div><div class="hdr-sub">Познание мира · 2 класс</div></div>
+    </div>
+    <div class="score-box">
+      <div class="sc"><span>${state.score}</span>очки</div>
+      <div class="sc"><span>${state.total}</span>всего</div>
+    </div>
+  </div>`;
+
+  const pct=Math.round((state.total/MAX_TOTAL)*100);
+  h+=`<div class="prog-wrap"><div class="prog-label">${pct}% пройдено</div><div class="progress"><div class="progress-bar" style="width:${pct}%"></div></div></div>`;
+
+  h+=`<div class="stage-nav">`;
+  STAGES.forEach((s,i)=>{
+    let cls='stage-btn';
+    if(i===state.stage)cls+=' active';
+    else if(i<state.stage)cls+=' done';
+    h+=`<button class="${cls}">${s.icon} ${s.label}</button>`;
+  });
+  h+=`</div>`;
+
+  if(stageId==='quiz'){
+    const q=QUIZ[state.quizIdx];
+    h+=`<div class="panel">
+      <div class="q-num">Вопрос ${state.quizIdx+1} из ${QUIZ.length}</div>
+      <div class="q-text">${q.q}</div>
+      <div class="opts">`;
+    q.opts.forEach((o,i)=>{
+      let cls='opt';
+      if(state.quizAnswered){
+        if(i===q.ans)cls+=' correct';
+        else if(i===state._lastAns&&i!==q.ans)cls+=' wrong';
+        else cls+=' disabled';
+      }
+      h+=`<button class="${cls}" onclick="answerQuiz(${i})">${o}</button>`;
+    });
+    h+=`</div><div class="feedback" id="fb"></div><button class="next-btn" id="nxt" onclick="nextQuiz()">${state.quizIdx<QUIZ.length-1?'Следующий вопрос →':'Задание 2: Компас →'}</button></div>`;
+  }
+
+  if(stageId==='compass'){
+    h+=`<div class="panel">
+      <div class="q-num">Задание 2 — Компас</div>
+      <div class="q-text">Нажми на слово, затем нажми на нужное место на компасе</div>
+      <div class="compass-game">
+        <div class="word-palette">`;
+    const filled=Object.values(state.compassFills).filter(Boolean);
+    ['Север','Юг','Запад','Восток'].forEach(w=>{
+      const used=filled.includes(w);
+      const sel=state.compassDragging===w;
+      h+=`<button class="drag-word${used?' used':''}${sel?' selected':''}" onclick="selectWord('${w}')">${w}</button>`;
+    });
+    h+=`</div>
+        <svg width="220" height="220" viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="110" cy="110" r="95" fill="#f1f8e9" stroke="#66bb6a" stroke-width="2.5"/>
+          <circle cx="110" cy="110" r="70" fill="white" stroke="#a5d6a7" stroke-width="1.5"/>
+          <circle cx="110" cy="110" r="10" fill="#2e7d32"/>
+          <circle cx="110" cy="110" r="5" fill="white"/>
+          <polygon points="110,32 117,110 103,110" fill="#e53935"/>
+          <polygon points="110,188 117,110 103,110" fill="#555"/>
+          <polygon points="188,110 110,103 110,117" fill="#555"/>
+          <polygon points="32,110 110,103 110,117" fill="#555"/>`;
+    Object.entries(COMPASS_POSITIONS).forEach(([pos,info])=>{
+      const fval=state.compassFills[pos];
+      const isOk=fval===info.word;
+      const isBad=fval&&!isOk;
+      const bg=fval?(isOk?'#c8e6c9':'#ffcdd2'):'white';
+      const stk=fval?(isOk?'#2e7d32':'#e53935'):'#a5d6a7';
+      const tc=fval?(isOk?'#1b5e20':'#b71c1c'):'#aaa';
+      h+=`<rect x="${info.x}" y="${info.y}" width="70" height="24" rx="6" fill="${bg}" stroke="${stk}" stroke-width="2" onclick="dropOn('${pos}')" style="cursor:pointer"/>
+          <text x="${info.x+35}" y="${info.y+16}" text-anchor="middle" font-size="12" font-weight="700" fill="${tc}" font-family="Nunito,sans-serif" onclick="dropOn('${pos}')" style="cursor:pointer">${fval||'_ _ _'}</text>`;
+    });
+    h+=`</svg>`;
+    const allFilled=Object.values(state.compassFills).every(Boolean);
+    if(allFilled){
+      const allOk=Object.entries(state.compassFills).every(([p,v])=>v===COMPASS_POSITIONS[p].word);
+      h+=`<div class="feedback show ${allOk?'ok':'err'}">${allOk?'🎉 Отлично! Все стороны расставлены верно! +4 очка':'❌ Некоторые ответы неверны. Нажми на ячейку, чтобы очистить её, и попробуй снова.'}</div>`;
+      if(allOk)h+=`<button class="next-btn show" onclick="nextStage()">Задание 3: Соответствие →</button>`;
+    }
+    h+=`</div></div>`;
+  }
+
+  if(stageId==='match'){
+    h+=`<div class="panel">
+      <div class="q-num">Задание 3 — Соответствие</div>
+      <div class="q-text">Выбери слово слева, затем нажми соответствующую букву справа</div>
+      <div class="match-area">
+        <div class="match-col">`;
+    MATCH_LEFT.forEach((w,i)=>{
+      const isMatched=Object.keys(state.matchPairs).map(Number).includes(i);
+      let cls='match-item';
+      if(isMatched)cls+=' matched';
+      else if(state.matchLeft===i)cls+=' selected';
+      h+=`<div class="${cls}" onclick="selectLeft(${i})">${w}</div>`;
+    });
+    h+=`</div><div class="match-col">`;
+    MATCH_RIGHT.forEach((w,i)=>{
+      const isMatched=Object.values(state.matchPairs).includes(i);
+      let cls='match-item';
+      if(isMatched)cls+=' matched';
+      h+=`<div class="${cls}" style="font-size:24px" onclick="selectRight(${i})">${w}</div>`;
+    });
+    h+=`</div></div>`;
+    if(state.matchDone){
+      h+=`<div class="feedback show ok">🎉 Отличная работа! Все пары найдены правильно!</div>
+          <button class="next-btn show" onclick="nextStage()">Задание 4: Солнце →</button>`;
+    }
+    h+=`</div>`;
+  }
+
+  if(stageId==='sun'){
+    h+=`<div class="panel">
+      <div class="q-num">Задание 4 — По солнцу</div>
+      <div class="q-text">Нажми на картинку и определи сторону горизонта</div>
+      <div class="sun-scene">`;
+    SUN_SCENES.forEach((sc,i)=>{
+      const answered=state.sunAnswers[i]!==undefined;
+      const correct=state.sunAnswers[i]===sc.answer;
+      let cls='sun-card';
+      if(answered)cls+=correct?' correct':' wrong';
+      else if(state.sunSelected===i)cls+=' selected';
+      h+=`<div class="${cls}" onclick="selectSun(${i})">
+        ${sc.svg}
+        <div class="sun-label">${sc.label}</div>
+        ${answered?`<div style="font-size:11px;font-weight:800;margin-top:4px;color:${correct?'#1b5e20':'#b71c1c'}">${correct?'✓ '+sc.answer:'✗ '+sc.answer}</div>`:''}
+      </div>`;
+    });
+    h+=`</div>`;
+    if(state.sunSelected!==null&&state.sunAnswers[state.sunSelected]===undefined){
+      h+=`<div class="opts">`;
+      ['Север','Юг','Запад','Восток'].forEach(d=>{
+        h+=`<button class="opt" onclick="answerSun('${d}')">${d}</button>`;
+      });
+      h+=`</div>`;
+    }
+    const allSun=Object.keys(state.sunAnswers).length===SUN_SCENES.length;
+    if(allSun){
+      const allOkSun=SUN_SCENES.every((sc,i)=>state.sunAnswers[i]===sc.answer);
+      h+=`<div class="feedback show ${allOkSun?'ok':'err'}">${allOkSun?'🌟 Великолепно! Ты умеешь определять стороны по солнцу!':'📚 Посмотри на правило и попробуй ещё раз!'}</div>
+          <button class="next-btn show" onclick="nextStage()">Посмотреть итоги →</button>`;
+    }
+    h+=`</div>`;
+  }
+
+  if(stageId==='result'){
+    const pctScore=Math.round((state.score/MAX_SCORE)*100);
+    let emoji,title,stars,bg;
+    if(pctScore>=80){emoji='🏆';title='Молодец! Ты знаешь стороны горизонта!';stars='⭐⭐⭐';}
+    else if(pctScore>=50){emoji='😊';title='Хорошая работа! Продолжай учиться!';stars='⭐⭐';}
+    else{emoji='📚';title='Нужно ещё потренироваться!';stars='⭐';}
+    h+=`<div class="result-panel">
+      <div class="confetti-strip">
+        <div class="dot" style="background:#e53935"></div>
+        <div class="dot" style="background:#fbc02d"></div>
+        <div class="dot" style="background:#43a047"></div>
+        <div class="dot" style="background:#1e88e5"></div>
+        <div class="dot" style="background:#8e24aa"></div>
+        <div class="dot" style="background:#fb8c00"></div>
+        <div class="dot" style="background:#e53935"></div>
+        <div class="dot" style="background:#43a047"></div>
+      </div>
+      <span class="result-emoji">${emoji}</span>
+      <div class="result-title">${title}</div>
+      <div class="result-stars">${stars}</div>
+      <div class="score-big">${state.score}</div>
+      <div class="score-max">из ${MAX_SCORE} очков (${pctScore}%)</div>
+      <div class="result-sub">Отвечено вопросов: ${state.total}</div>
+      <button class="restart-btn" onclick="restart()">🔄 Играть снова</button>
+    </div>`;
+  }
+
+  app.innerHTML=h;
+
+  if(stageId==='quiz'&&state.quizAnswered){
+    const fb=document.getElementById('fb');
+    const nxt=document.getElementById('nxt');
+    const q=QUIZ[state.quizIdx];
+    if(state._lastAns===q.ans){
+      fb.className='feedback show ok';
+      fb.textContent='✓ Правильно! +2 очка';
+    } else {
+      fb.className='feedback show err';
+      fb.textContent='✗ Неверно. Правильный ответ: '+q.opts[q.ans];
+    }
+    nxt.className='next-btn show';
+  }
+}
+
+function answerQuiz(i){
+  if(state.quizAnswered)return;
+  state.quizAnswered=true;
+  state.total++;
+  state._lastAns=i;
+  const q=QUIZ[state.quizIdx];
+  if(i===q.ans)state.score+=2;
+  render();
+}
+
+function nextQuiz(){
+  state.quizIdx++;
+  state.quizAnswered=false;
+  state._lastAns=null;
+  if(state.quizIdx>=QUIZ.length)state.stage=1;
+  render();
+}
+
+function selectWord(w){
+  state.compassDragging=(state.compassDragging===w)?null:w;
+  render();
+}
+
+function dropOn(pos){
+  if(!state.compassDragging)return;
+  if(state.compassFills[pos]){
+    state.compassFills[pos]=null;
+  }
+  state.compassFills[pos]=state.compassDragging;
+  state.compassDragging=null;
+  const allFilled=Object.values(state.compassFills).every(Boolean);
+  if(allFilled){
+    const allOk=Object.entries(state.compassFills).every(([p,v])=>v===COMPASS_POSITIONS[p].word);
+    if(allOk&&!state._compassScored){state.score+=4;state.total+=4;state._compassScored=true;}
+    else if(!allOk&&!state._compassScored){state.total+=4;state._compassScored=true;}
+  }
+  render();
+}
+
+function selectLeft(i){state.matchLeft=i;render();}
+
+function selectRight(i){
+  if(state.matchLeft===null)return;
+  const li=state.matchLeft;
+  if(MATCH_PAIRS[li]===i){
+    state.matchPairs[li]=i;
+    state.score+=2;
+    state.total++;
+    state.matchLeft=null;
+    if(Object.keys(state.matchPairs).length===MATCH_LEFT.length)state.matchDone=true;
+    render();
+  } else {
+    state.total++;
+    render();
+    setTimeout(()=>{
+      document.querySelectorAll('.match-col')[0].children[li].classList.add('wrong-match');
+      document.querySelectorAll('.match-col')[1].children[i].classList.add('wrong-match');
+      setTimeout(()=>{state.matchLeft=null;render();},600);
+    },50);
+  }
+}
+
+function selectSun(i){
+  if(state.sunAnswers[i]!==undefined)return;
+  state.sunSelected=i;
+  render();
+}
+
+function answerSun(dir){
+  const i=state.sunSelected;
+  if(i===null)return;
+  state.sunAnswers[i]=dir;
+  state.total++;
+  if(dir===SUN_SCENES[i].answer)state.score+=2;
+  state.sunSelected=null;
+  render();
+}
+
+function nextStage(){state.stage++;render();}
+
+function restart(){
+  state={stage:0,score:0,total:0,quizIdx:0,quizAnswered:false,_lastAns:null,_compassScored:false,compassFills:{top:null,bottom:null,left:null,right:null},compassDragging:null,matchLeft:null,matchPairs:{},matchDone:false,sunAnswers:{},sunSelected:null};
+  render();
+}
+
+render();
+</script>
+</body>
+</html>

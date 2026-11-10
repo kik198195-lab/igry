@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Космическая Битва: Части Речи</title>
+    <style>
+        :root { --vostok: #00d2ff; --soyuz: #ff4b2b; --gold: #ffd700; }
+        
+        body { 
+            margin: 0; 
+            font-family: 'Arial Black', sans-serif; 
+            background: #050510; 
+            color: white; 
+            overflow: hidden; 
+            height: 100vh; 
+        }
+
+        /* Анимированный космос */
+        .space {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%);
+            z-index: -1;
+        }
+
+        .comet {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            box-shadow: 0 0 15px 2px white;
+            opacity: 0;
+            animation: shoot 5s infinite;
+        }
+
+        @keyframes shoot {
+            0% { transform: translateX(0) translateY(0); opacity: 1; }
+            20% { transform: translateX(1000px) translateY(500px); opacity: 0; }
+            100% { opacity: 0; }
+        }
+
+        /* Заголовок */
+        .top-bar {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-bottom: 4px solid var(--gold);
+            text-align: center;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+        }
+
+        #task-text { font-size: 32px; color: var(--gold); text-transform: uppercase; }
+
+        .container {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            height: calc(100vh - 100px);
+            padding: 0 40px;
+        }
+
+        /* Игровые кабины */
+        .cabin {
+            width: 44%;
+            height: 75%;
+            background: rgba(255, 255, 255, 0.07);
+            border: 6px solid #444;
+            border-radius: 50px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            padding: 30px;
+            box-sizing: border-box;
+            transition: 0.3s;
+        }
+
+        .cabin-vostok { border-color: var(--vostok); box-shadow: 0 0 40px rgba(0, 210, 255, 0.2); }
+        .cabin-soyuz { border-color: var(--soyuz); box-shadow: 0 0 40px rgba(255, 75, 43, 0.2); }
+
+        .team-label { font-size: 24px; margin-bottom: 20px; text-shadow: 0 0 10px #000; }
+
+        /* Кнопки со словами */
+        .word-grid { display: grid; gap: 15px; width: 100%; }
+        .w-btn {
+            background: #1a1a1a;
+            border: 3px solid #555;
+            color: white;
+            padding: 22px;
+            font-size: 28px;
+            font-weight: bold;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .w-btn:hover { background: #333; transform: scale(1.02); }
+
+        /* Супер-игра */
+        .mix-mode { display: none; text-align: center; }
+        .target-word { font-size: 55px; margin-bottom: 20px; padding: 20px; border: 4px dashed var(--gold); border-radius: 20px; background: rgba(0,0,0,0.5); }
+
+        /* Герои (Герои всплывают поверх кнопок) */
+        .popup {
+            position: absolute;
+            width: 200px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 500;
+            pointer-events: none;
+        }
+        .popup.active { transform: translate(-50%, -70%) scale(1.2); opacity: 1; }
+
+        /* Прогресс и Ракета */
+        .fuel-line { width: 100%; height: 20px; background: #000; border-radius: 10px; margin-top: auto; position: relative; border: 2px solid #555; }
+        .fuel-fill { height: 100%; width: 0%; background: var(--gold); transition: 0.5s; }
+        .rocket { position: absolute; bottom: -10px; left: 45%; font-size: 70px; transition: 1.5s ease-in; }
+        .launch { bottom: 120vh !important; }
+
+        /* Финальный экран */
+        #finish {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle, #2c3e50, #000);
+            display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 9999;
+        }
+
+        .start-btn { padding: 30px 60px; font-size: 30px; background: var(--gold); border: none; border-radius: 50px; cursor: pointer; font-weight: bold; box-shadow: 0 0 30px var(--gold); }
+    </style>
+</head>
+<body>
+
+<div class="space">
+    <div class="comet" style="top: 10%; left: 10%;"></div>
+    <div class="comet" style="top: 30%; left: 50%; animation-delay: 2s;"></div>
+    <div class="comet" style="top: 60%; left: 80%; animation-delay: 4s;"></div>
+</div>
+
+<div id="intro" style="position:fixed; width:100%; height:100%; background:#050510; z-index:10000; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+    <h1 style="font-size: 50px; color:white;">ГОТОВЫ К ПОЛЁТУ?</h1>
+    <button class="start-btn" onclick="begin()">🚀 ВКЛЮЧИТЬ ДВИГАТЕЛИ</button>
+</div>
+
+<div class="top-bar">
+    <div id="task-text">ТУР 1: НАЙДИ СУЩЕСТВИТЕЛЬНЫЕ</div>
+</div>
+
+<div class="container">
+    <div id="cabin1" class="cabin cabin-vostok">
+        <div class="team-label" style="color:var(--vostok)">🛰️ СТАНЦИЯ ВОСТОК-1</div>
+        <div id="grid1" class="word-grid">
+            <button class="w-btn" onclick="press(1, 0)"></button>
+            <button class="w-btn" onclick="press(1, 1)"></button>
+            <button class="w-btn" onclick="press(1, 2)"></button>
+        </div>
+        <div id="mix1" class="mix-mode">
+            <div id="tw1" class="target-word"></div>
+            <button class="w-btn" style="color:var(--vostok)" onclick="pressMix(1,'сущ')">СУЩЕСТВИТЕЛЬНОЕ</button>
+            <button class="w-btn" style="color:#8e44ad" onclick="pressMix(1,'прил')">ПРИЛАГАТЕЛЬНОЕ</button>
+            <button class="w-btn" style="color:#27ae60" onclick="pressMix(1,'глаг')">ГЛАГОЛ</button>
+        </div>
+        <div class="fuel-line"><div id="bar1" class="fuel-fill"></div></div>
+        <div id="rock1" class="rocket">🚀</div>
+        <img id="win-img1" class="popup" src="https://cdn-icons-png.flaticon.com/512/2026/2026462.png">
+        <img id="lose-img1" class="popup" src="https://cdn-icons-png.flaticon.com/512/1067/1067131.png">
+    </div>
+
+    <div id="cabin2" class="cabin cabin-soyuz">
+        <div class="team-label" style="color:var(--soyuz)">🛸 КОРАБЛЬ СОЮЗ</div>
+        <div id="grid2" class="word-grid">
+            <button class="w-btn" onclick="press(2, 0)"></button>
+            <button class="w-btn" onclick="press(2, 1)"></button>
+            <button class="w-btn" onclick="press(2, 2)"></button>
+        </div>
+        <div id="mix2" class="mix-mode">
+            <div id="tw2" class="target-word"></div>
+            <button class="w-btn" style="color:var(--vostok)" onclick="pressMix(2,'сущ')">СУЩЕСТВИТЕЛЬНОЕ</button>
+            <button class="w-btn" style="color:#8e44ad" onclick="pressMix(2,'прил')">ПРИЛАГАТЕЛЬНОЕ</button>
+            <button class="w-btn" style="color:#27ae60" onclick="pressMix(2,'глаг')">ГЛАГОЛ</button>
+        </div>
+        <div class="fuel-line"><div id="bar2" class="fuel-fill"></div></div>
+        <div id="rock2" class="rocket">🚀</div>
+        <img id="win-img2" class="popup" src="https://cdn-icons-png.flaticon.com/512/2026/2026462.png">
+        <img id="lose-img2" class="popup" src="https://cdn-icons-png.flaticon.com/512/1067/1067131.png">
+    </div>
+</div>
+
+<div id="finish">
+    <div style="font-size: 150px;">🏆</div>
+    <h1 id="winner-name" style="color:var(--gold); font-size: 60px;"></h1>
+    <button class="start-btn" onclick="location.reload()">ИГРАТЬ СНОВА</button>
+</div>
+
+<script>
+    const dictionary = {
+        'сущ': ['КОМЕТА', 'ЗВЕЗДА', 'ЛУНА', 'НЕБО', 'РОБОТ', 'КНИГА', 'УЧИТЕЛЬ', 'ЗЕМЛЯ', 'СОЛНЦЕ', 'ГЕРОЙ', 'ОКЕАН', 'ЛЕС', 'ДОЖДЬ', 'ПАРТА', 'ДРУГ'],
+        'прил': ['ЯРКИЙ', 'ДАЛЕКИЙ', 'БЫСТРЫЙ', 'УМНЫЙ', 'СИНИЙ', 'БОЛЬШОЙ', 'ДОБРЫЙ', 'КРАСИВЫЙ', 'ГОРЯЧИЙ', 'ХОЛОДНЫЙ', 'ЗВЕЗДНЫЙ', 'ЛЕГКИЙ', 'ТЯЖЕЛЫЙ', 'СМЕЛЫЙ'],
+        'глаг': ['ЛЕТЕТЬ', 'СВЕТИТЬ', 'МЕЧТАТЬ', 'ПРЫГАТЬ', 'ПИСАТЬ', 'ЧИТАТЬ', 'ДУМАТЬ', 'РИСОВАТЬ', 'ИГРАТЬ', 'СПАТЬ', 'БЕЖАТЬ', 'ИДТИ', 'ПЕТЬ', 'УЧИТЬ']
+    };
+
+    let round = 1, lock = false;
+    let scores = { 1:0, 2:0 };
+    let tasks = { 1:[], 2:[] }, singles = { 1:{}, 2:{} };
+    let audio;
+
+    function begin() {
+        audio = new (window.AudioContext || window.webkitAudioContext)();
+        document.getElementById('intro').style.display = 'none';
+        nextRound();
+    }
+
+    function nextRound() {
+        if(round > 4) {
+            document.getElementById('finish').style.display = 'flex';
+            document.getElementById('winner-name').innerText = scores[1] > scores[2] ? "ВОСТОК-1 ПОБЕДИЛ!" : "СОЮЗ ПОБЕДИЛ!";
+            return;
+        }
+        lock = false;
+        const labels = {1:"НАЙДИ СУЩЕСТВИТЕЛЬНЫЕ", 2:"НАЙДИ ПРИЛАГАТЕЛЬНЫЕ", 3:"НАЙДИ ГЛАГОЛЫ", 4:"СУПЕР-ИГРА: ЧТО ЭТО?"};
+        document.getElementById('task-text').innerText = `ТУР ${round}: ${labels[round]}`;
+        
+        [1,2].forEach(t => {
+            document.getElementById('grid'+t).style.display = round < 4 ? 'grid' : 'none';
+            document.getElementById('mix'+t).style.display = round === 4 ? 'block' : 'none';
+            document.getElementById('bar'+t).style.width = '0%';
+            document.getElementById('rock'+t).className = 'rocket';
+            scores[t] = 0;
+            newTask(t);
+        });
+    }
+
+    function newTask(t) {
+        if(round < 4) {
+            let types = ['сущ', 'прил', 'глаг'];
+            let correct = types[round-1];
+            let others = types.filter(x => x !== correct);
+            let words = [
+                {w: rand(dictionary[correct]), ok: true},
+                {w: rand(dictionary[others[0]]), ok: false},
+                {w: rand(dictionary[others[1]]), ok: false}
+            ].sort(() => Math.random() - 0.5);
+            tasks[t] = words;
+            let btns = document.getElementById('grid'+t).children;
+            for(let i=0; i<3; i++) btns[i].innerText = words[i].w;
+        } else {
+            let types = ['сущ', 'прил', 'глаг'], rt = types[Math.floor(Math.random()*3)];
+            let rw = rand(dictionary[rt]);
+            singles[t] = {w: rw, type: rt};
+            document.getElementById('tw'+t).innerText = rw;
+        }
+    }
+
+    function press(t, i) { if(!lock) validate(t, tasks[t][i].ok); }
+    function pressMix(t, type) { if(!lock) validate(t, singles[t].type === type); }
+
+    function validate(t, isOk) {
+        let hero = document.getElementById((isOk?'win':'lose')+'-img'+t);
+        hero.classList.add('active');
+        if(isOk) {
+            scores[t]++; beep(800, 0.2);
+            document.getElementById('bar'+t).style.width = (scores[t]*20)+'%';
+            if(scores[t] >= 5) { shipGo(t); return; }
+        } else { beep(150, 0.3, 'sawtooth'); }
+        setTimeout(() => { hero.classList.remove('active'); newTask(t); }, 600);
+    }
+
+    function shipGo(t) {
+        lock = true; beep(100, 1, 'sawtooth');
+        document.getElementById('rock'+t).classList.add('launch');
+        setTimeout(() => { round++; nextRound(); }, 1600);
+    }
+
+    function beep(f, d, type='sine') {
+        let o = audio.createOscillator(), g = audio.createGain();
+        o.type = type; o.frequency.value = f;
+        g.gain.setValueAtTime(0.1, audio.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.0001, audio.currentTime + d);
+        o.connect(g); g.connect(audio.destination);
+        o.start(); o.stop(audio.currentTime + d);
+    }
+
+    function rand(arr) { return arr[Math.floor(Math.random()*arr.length)]; }
+</script>
+</body>
+</html>

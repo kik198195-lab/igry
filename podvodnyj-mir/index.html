@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Подводный мир — Части речи</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+button{touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
+body{font-family:'Nunito',sans-serif;min-height:100vh;overflow-x:hidden;user-select:none;}
+
+/* ===== OCEAN BG ===== */
+.ocean-bg{
+  position:fixed;inset:0;z-index:0;
+  background:linear-gradient(180deg,#00E5FF 0%,#0097A7 30%,#006064 65%,#004D40 100%);
+}
+/* Light rays */
+.ocean-bg::before{
+  content:'';position:absolute;inset:0;
+  background:repeating-linear-gradient(
+    -45deg,
+    rgba(255,255,255,0.04) 0px,rgba(255,255,255,0.04) 40px,
+    transparent 40px,transparent 80px
+  );
+  animation:rayMove 8s linear infinite;
+}
+@keyframes rayMove{from{background-position:0 0;}to{background-position:160px 160px;}}
+
+/* Bubbles */
+.bbl{position:fixed;border-radius:50%;background:rgba(255,255,255,0.18);border:1px solid rgba(255,255,255,0.35);pointer-events:none;animation:bblRise linear infinite;z-index:0;}
+@keyframes bblRise{0%{transform:translateY(0) translateX(0);opacity:0.8;}50%{transform:translateY(-50vh) translateX(12px);}100%{transform:translateY(-110vh) translateX(-8px);opacity:0;}}
+
+/* Seaweed */
+.seaweed{position:fixed;bottom:0;z-index:0;pointer-events:none;}
+.sw{display:inline-block;font-size:28px;animation:swWave 2.5s ease-in-out infinite;transform-origin:bottom center;}
+@keyframes swWave{0%,100%{transform:rotate(-8deg);}50%{transform:rotate(8deg);}}
+
+/* Swimming fish */
+.bg-fish{position:fixed;font-size:22px;animation:fishSwim linear infinite;pointer-events:none;z-index:0;opacity:0.5;}
+@keyframes fishSwim{from{left:-60px;}to{left:110vw;}}
+
+.screen{display:none;position:relative;z-index:1;}
+.screen.active{display:flex;flex-direction:column;align-items:center;min-height:100vh;}
+
+/* ===== MENU ===== */
+#menu{padding:16px 16px 36px;text-align:center;}
+.menu-logo{font-size:70px;animation:fishBob 2s ease-in-out infinite;display:block;margin-top:8px;}
+@keyframes fishBob{0%,100%{transform:translateY(0) rotate(-5deg);}50%{transform:translateY(-12px) rotate(5deg);}}
+.menu-title{font-size:38px;font-weight:900;color:#fff;text-shadow:3px 3px 0 rgba(0,77,64,0.6),0 0 20px rgba(0,229,255,0.6);margin:10px 0 4px;}
+.menu-sub{font-size:14px;color:#E0F7FA;background:rgba(0,0,0,0.2);padding:5px 18px;border-radius:50px;margin:0 0 24px;font-weight:700;display:inline-block;}
+
+.mode-wrap{display:flex;flex-direction:column;gap:13px;width:100%;max-width:360px;}
+.mode-btn{padding:20px 22px;border-radius:22px;border:3px solid rgba(255,255,255,0.4);cursor:pointer;font-family:'Nunito',sans-serif;color:#fff;display:flex;align-items:center;gap:14px;transition:all 0.15s;box-shadow:0 6px 0 rgba(0,0,0,0.2);}
+.mode-btn:active{transform:translateY(4px);box-shadow:0 2px 0 rgba(0,0,0,0.2);}
+.mb-icon{font-size:36px;flex-shrink:0;}
+.mb-txt{display:flex;flex-direction:column;text-align:left;}
+.mb-name{font-size:19px;font-weight:900;}
+.mb-desc{font-size:12px;font-weight:600;opacity:0.85;margin-top:2px;}
+.btn-solo{background:linear-gradient(135deg,#FF7043,#E64A19);}
+.btn-duo{background:linear-gradient(135deg,#AB47BC,#6A1B9A);}
+.author-tag{margin-top:24px;color:rgba(255,255,255,0.3);font-size:12px;letter-spacing:2px;font-weight:700;}
+
+/* ===== HEADER ===== */
+.game-hdr{background:rgba(0,0,0,0.2);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;width:100%;backdrop-filter:blur(4px);}
+.back-btn{background:#fff;border:none;color:#006064;font-family:'Nunito',sans-serif;font-size:13px;font-weight:800;padding:8px 16px;border-radius:50px;cursor:pointer;box-shadow:0 3px 0 rgba(0,0,0,0.2);}
+.back-btn:active{transform:translateY(2px);}
+.hdr-info{color:#fff;font-size:14px;font-weight:800;text-shadow:1px 1px 2px rgba(0,0,0,0.4);}
+
+/* ===== PROGRESS DIVER ===== */
+.diver-track{
+  width:100%;padding:10px 12px 4px;
+}
+.diver-road{
+  height:52px;
+  background:rgba(0,0,0,0.15);
+  border-radius:16px;
+  border:2px solid rgba(255,255,255,0.2);
+  position:relative;overflow:hidden;
+}
+/* bubbles on track */
+.diver-road::before{
+  content:'💨💨💨';position:absolute;
+  bottom:2px;left:0;right:0;
+  font-size:10px;letter-spacing:8px;
+  opacity:0.3;animation:trackBubble 1.5s linear infinite;
+}
+@keyframes trackBubble{from{letter-spacing:8px;opacity:0.3;}to{letter-spacing:14px;opacity:0;}}
+.diver-car{position:absolute;top:50%;transform:translateY(-55%) scaleX(-1);font-size:28px;transition:left 0.55s cubic-bezier(0.34,1.4,0.64,1);z-index:2;}
+.diver-finish{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:22px;z-index:2;}
+.diver-bar-wrap{height:6px;background:rgba(255,255,255,0.2);border-radius:3px;margin-top:5px;overflow:hidden;}
+.diver-bar{height:100%;border-radius:3px;background:linear-gradient(90deg,#00E5FF,#E040FB);transition:width 0.5s ease;}
+
+.track-lbl{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;}
+.t-name{font-size:13px;font-weight:900;color:#fff;text-shadow:1px 1px 2px rgba(0,0,0,0.4);}
+.t-score{background:rgba(255,255,255,0.2);border-radius:50px;padding:2px 12px;color:#fff;font-size:12px;font-weight:800;}
+
+/* ===== WORD BUBBLE ===== */
+.word-bubble-wrap{
+  margin:10px 12px 8px;
+  display:flex;flex-direction:column;align-items:center;
+}
+.word-bubble{
+  background:radial-gradient(circle at 30% 28%,rgba(255,255,255,0.7),rgba(0,188,212,0.35));
+  border:3px solid rgba(255,255,255,0.6);
+  border-radius:50%;
+  width:150px;height:150px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  box-shadow:0 0 30px rgba(0,229,255,0.4), inset 0 0 20px rgba(255,255,255,0.15);
+  animation:bubbleWobble 3s ease-in-out infinite;
+  position:relative;
+}
+@keyframes bubbleWobble{0%,100%{transform:scale(1) translateY(0);}50%{transform:scale(1.04) translateY(-6px);}}
+.bubble-q{font-size:11px;font-weight:800;color:rgba(0,77,64,0.7);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px;}
+.bubble-word{font-size:26px;font-weight:900;color:#004D40;text-shadow:1px 1px 0 rgba(255,255,255,0.5);}
+/* bubble shine */
+.word-bubble::after{content:'';position:absolute;top:14px;left:24px;width:22px;height:12px;background:rgba(255,255,255,0.55);border-radius:50%;transform:rotate(-30deg);}
+
+/* ===== ANSWER SHELLS ===== */
+.shells-grid{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:10px;padding:0 12px;width:100%;max-width:500px;
+}
+.shell-btn{
+  padding:14px 8px;border-radius:20px;
+  border:3px solid rgba(255,255,255,0.4);
+  font-family:'Nunito',sans-serif;font-size:14px;font-weight:900;
+  cursor:pointer;color:#fff;text-align:center;
+  transition:all 0.14s;
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  box-shadow:0 5px 0 rgba(0,0,0,0.2);
+}
+.shell-btn:active{transform:translateY(4px);box-shadow:0 1px 0 rgba(0,0,0,0.2);}
+.shell-icon{font-size:24px;}
+.shell-label{font-size:13px;line-height:1.2;}
+.shell-q{font-size:10px;opacity:0.8;font-weight:600;}
+
+.s0{background:linear-gradient(135deg,#FF7043,#E64A19);box-shadow:0 5px 0 #BF360C;}
+.s1{background:linear-gradient(135deg,#AB47BC,#7B1FA2);box-shadow:0 5px 0 #4A148C;}
+.s2{background:linear-gradient(135deg,#26C6DA,#0097A7);box-shadow:0 5px 0 #006064;}
+.s3{background:linear-gradient(135deg,#66BB6A,#388E3C);box-shadow:0 5px 0 #1B5E20;}
+
+.shell-btn.correct-flash{animation:cFlash 0.4s ease;background:linear-gradient(135deg,#4CAF50,#2E7D32)!important;box-shadow:0 5px 0 #1B5E20!important;}
+.shell-btn.wrong-flash{animation:wShake 0.4s ease;}
+@keyframes cFlash{0%{transform:scale(1);}50%{transform:scale(1.08);}100%{transform:scale(1);}}
+@keyframes wShake{0%,100%{transform:translateX(0);}30%{transform:translateX(-9px);}70%{transform:translateX(9px);}}
+
+/* ===== DUO SCREEN ===== */
+#duoScreen{padding:0 0 16px;width:100%;}
+
+.duo-tracks{width:100%;padding:8px 10px 4px;display:flex;flex-direction:column;gap:7px;}
+
+.duo-score-strip{
+  margin:4px 12px;background:rgba(0,0,0,0.18);
+  border-radius:14px;padding:7px 16px;
+  display:flex;align-items:center;justify-content:space-between;
+  color:#fff;font-size:14px;font-weight:900;
+  backdrop-filter:blur(4px);
+}
+.vs-badge{background:#FFD700;color:#004D40;border-radius:50px;padding:2px 14px;font-size:13px;font-weight:900;}
+
+/* Two player panels */
+.duo-panels{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:8px;padding:6px 10px 0;
+}
+.duo-panel{
+  border-radius:18px;padding:9px 7px;
+  display:flex;flex-direction:column;align-items:center;gap:7px;
+}
+.dp1{background:rgba(255,112,67,0.15);border:2px solid rgba(255,112,67,0.4);}
+.dp2{background:rgba(171,71,188,0.15);border:2px solid rgba(171,71,188,0.4);}
+.dp-hdr{width:100%;text-align:center;border-radius:10px;padding:5px 4px;font-size:13px;font-weight:900;color:#fff;}
+.dp1 .dp-hdr{background:#FF7043;}
+.dp2 .dp-hdr{background:#AB47BC;}
+
+/* Mini bubble for duo */
+.mini-bubble{
+  background:radial-gradient(circle at 30% 28%,rgba(255,255,255,0.65),rgba(0,188,212,0.3));
+  border:2px solid rgba(255,255,255,0.55);
+  border-radius:50%;width:90px;height:90px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  box-shadow:0 0 18px rgba(0,229,255,0.35);
+  animation:bubbleWobble 3s ease-in-out infinite;
+  position:relative;
+}
+.mini-bubble::after{content:'';position:absolute;top:8px;left:14px;width:14px;height:7px;background:rgba(255,255,255,0.5);border-radius:50%;transform:rotate(-30deg);}
+.mb-ql{font-size:8px;font-weight:800;color:rgba(0,77,64,0.7);letter-spacing:1px;text-transform:uppercase;margin-bottom:2px;}
+.mb-word{font-size:15px;font-weight:900;color:#004D40;text-align:center;line-height:1.2;}
+
+/* Duo answer buttons */
+.duo-shells{display:grid;grid-template-columns:1fr 1fr;gap:5px;width:100%;}
+.duo-shell{
+  padding:9px 4px;border-radius:13px;
+  border:2px solid rgba(255,255,255,0.35);
+  font-family:'Nunito',sans-serif;font-size:11px;font-weight:800;
+  cursor:pointer;color:#fff;text-align:center;
+  transition:all 0.12s;
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  box-shadow:0 3px 0 rgba(0,0,0,0.2);
+  line-height:1.2;
+}
+.duo-shell:active{transform:translateY(3px);box-shadow:0 0 0 rgba(0,0,0,0.2);}
+.duo-shell .ds-icon{font-size:16px;}
+.d1s0{background:linear-gradient(135deg,#FF7043,#E64A19);box-shadow:0 3px 0 #BF360C;}
+.d1s1{background:linear-gradient(135deg,#EC407A,#C2185B);box-shadow:0 3px 0 #880E4F;}
+.d1s2{background:linear-gradient(135deg,#FFA726,#E65100);box-shadow:0 3px 0 #BF360C;}
+.d1s3{background:linear-gradient(135deg,#EF5350,#B71C1C);box-shadow:0 3px 0 #7F0000;}
+.d2s0{background:linear-gradient(135deg,#AB47BC,#7B1FA2);box-shadow:0 3px 0 #4A148C;}
+.d2s1{background:linear-gradient(135deg,#42A5F5,#1565C0);box-shadow:0 3px 0 #0D47A1;}
+.d2s2{background:linear-gradient(135deg,#26C6DA,#006064);box-shadow:0 3px 0 #004D40;}
+.d2s3{background:linear-gradient(135deg,#5C6BC0,#283593);box-shadow:0 3px 0 #1A237E;}
+.duo-shell.correct-flash{animation:cFlash 0.4s ease;background:linear-gradient(135deg,#4CAF50,#2E7D32)!important;box-shadow:0 3px 0 #1B5E20!important;}
+.duo-shell.wrong-flash{animation:wShake 0.35s ease;}
+
+/* ===== RESULTS ===== */
+#results{justify-content:center;align-items:center;text-align:center;padding:30px 16px;}
+.result-card{background:rgba(255,255,255,0.92);border-radius:28px;padding:32px 24px;max-width:360px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,0.3);border:3px solid rgba(0,229,255,0.4);}
+.result-emoji{font-size:76px;margin-bottom:10px;display:block;animation:resultBounce 0.5s ease;}
+@keyframes resultBounce{0%{transform:scale(0) rotate(-20deg);}70%{transform:scale(1.15) rotate(5deg);}100%{transform:scale(1) rotate(0);}}
+.result-title{font-size:30px;font-weight:900;color:#004D40;margin-bottom:6px;}
+.result-stars{font-size:30px;margin:8px 0;}
+.result-score{font-size:16px;color:#006064;margin-bottom:4px;font-weight:700;}
+.result-btns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:22px;}
+.res-btn{padding:13px 26px;border-radius:50px;border:none;font-family:'Nunito',sans-serif;font-size:14px;font-weight:900;cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,0.2);}
+.res-btn:active{transform:translateY(3px);}
+.res-btn.primary{background:linear-gradient(135deg,#FF7043,#E64A19);color:#fff;}
+.res-btn.secondary{background:#E0F7FA;color:#006064;}
+
+/* TOAST */
+.toast{position:fixed;top:14px;left:50%;transform:translateX(-50%) translateY(-100px);padding:10px 22px;border-radius:50px;font-size:15px;font-weight:800;transition:transform 0.28s cubic-bezier(0.34,1.56,0.64,1);z-index:999;white-space:nowrap;box-shadow:0 6px 24px rgba(0,0,0,0.25);}
+.toast.show{transform:translateX(-50%) translateY(0);}
+.toast.correct-t{background:#4CAF50;color:#fff;}
+.toast.wrong-t{background:#FF5252;color:#fff;}
+.toast.info-t{background:rgba(255,255,255,0.9);color:#004D40;border:2px solid rgba(0,229,255,0.4);}
+
+/* CONFETTI */
+.confetti-piece{position:fixed;border-radius:3px;animation:confettiFall linear forwards;pointer-events:none;z-index:9999;}
+@keyframes confettiFall{0%{transform:translateY(-30px) rotate(0deg);opacity:1;}100%{transform:translateY(110vh) rotate(540deg);opacity:0;}}
+
+/* Winner overlay */
+.winner-overlay{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.55);align-items:center;justify-content:center;}
+.winner-overlay.show{display:flex;}
+.winner-box{background:rgba(255,255,255,0.96);border-radius:28px;padding:36px 28px;text-align:center;max-width:300px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.35);animation:resultBounce 0.5s ease;}
+.w-emoji{font-size:60px;display:block;margin-bottom:10px;}
+.w-title{font-size:24px;font-weight:900;color:#004D40;margin-bottom:6px;}
+.w-sub{font-size:15px;color:#006064;margin-bottom:20px;font-weight:700;}
+.w-btns{display:flex;gap:10px;justify-content:center;}
+
+/* Music */
+.music-btn{position:fixed;bottom:14px;right:14px;z-index:99;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,0.9);border:2px solid rgba(0,229,255,0.4);font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 0 rgba(0,0,0,0.15);}
+</style>
+</head>
+<body>
+
+<div class="ocean-bg"></div>
+<div class="toast" id="toast"></div>
+<div id="confettiBox" style="position:fixed;inset:0;pointer-events:none;z-index:9999;"></div>
+<button class="music-btn" id="musicBtn" onclick="toggleMusic()">🎵</button>
+
+<!-- Winner overlay -->
+<div class="winner-overlay" id="winnerOverlay">
+  <div class="winner-box">
+    <span class="w-emoji" id="wEmoji"></span>
+    <div class="w-title" id="wTitle"></div>
+    <div class="w-sub" id="wSub"></div>
+    <div class="w-btns">
+      <button class="res-btn primary" onclick="closeWinner();playAgain()">Ещё раз!</button>
+      <button class="res-btn secondary" onclick="closeWinner();goMenu()">Меню</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MENU ===== -->
+<div class="screen active" id="menu">
+  <span class="menu-logo">🐠</span>
+  <div class="menu-title">Подводный мир</div>
+  <div class="menu-sub">Части речи • 2–4 класс 🐚</div>
+  <div class="mode-wrap">
+    <button class="mode-btn btn-solo" onclick="startSolo()">
+      <span class="mb-icon">🤿</span>
+      <span class="mb-txt">
+        <span class="mb-name">Один игрок</span>
+        <span class="mb-desc">10 вопросов — доплыви до сокровищ!</span>
+      </span>
+    </button>
+    <button class="mode-btn btn-duo" onclick="startDuo()">
+      <span class="mb-icon">🐠🐡</span>
+      <span class="mb-txt">
+        <span class="mb-name">Соревнование на двоих</span>
+        <span class="mb-desc">Свои слова у каждого — кто быстрее?</span>
+      </span>
+    </button>
+  </div>
+  <div class="author-tag">@dlya.urokov23</div>
+</div>
+
+<!-- ===== SOLO SCREEN ===== -->
+<div class="screen" id="soloScreen">
+  <div class="game-hdr">
+    <button class="back-btn" onclick="goMenu()">← Меню</button>
+    <div class="hdr-info" id="soloInfo">Вопрос 1 / 10</div>
+  </div>
+
+  <div class="diver-track">
+    <div class="track-lbl">
+      <span class="t-name">🤿 Ныряльщик</span>
+      <span class="t-score" id="soloScore">0 ✅</span>
+    </div>
+    <div class="diver-road" id="soloRoad">
+      <div class="diver-car" id="soloDiver" style="left:4px;">🤿</div>
+      <div class="diver-finish">🏆</div>
+    </div>
+    <div class="diver-bar-wrap"><div class="diver-bar" id="soloBar" style="width:0%"></div></div>
+  </div>
+
+  <div class="word-bubble-wrap">
+    <div class="word-bubble">
+      <div class="bubble-q">Какая часть речи?</div>
+      <div class="bubble-word" id="soloWord">слово</div>
+    </div>
+  </div>
+
+  <div class="shells-grid" id="soloShells"></div>
+</div>
+
+<!-- ===== DUO SCREEN ===== -->
+<div class="screen" id="duoScreen">
+  <div class="game-hdr">
+    <button class="back-btn" onclick="goMenu()">← Меню</button>
+    <div class="hdr-info">Первый до 10 — чемпион! 🏆</div>
+  </div>
+
+  <!-- Tracks -->
+  <div class="duo-tracks">
+    <div class="diver-track" style="padding:0;">
+      <div class="track-lbl">
+        <span class="t-name">🐠 Игрок 1</span>
+        <span class="t-score" id="d1Score">0 ✅</span>
+      </div>
+      <div class="diver-road">
+        <div class="diver-car" id="car1" style="left:4px;">🐠</div>
+        <div class="diver-finish">🏆</div>
+      </div>
+      <div class="diver-bar-wrap"><div class="diver-bar" id="bar1" style="width:0%"></div></div>
+    </div>
+    <div class="diver-track" style="padding:0;margin-top:7px;">
+      <div class="track-lbl">
+        <span class="t-name">🐡 Игрок 2</span>
+        <span class="t-score" id="d2Score">0 ✅</span>
+      </div>
+      <div class="diver-road">
+        <div class="diver-car" id="car2" style="left:4px;">🐡</div>
+        <div class="diver-finish">🏆</div>
+      </div>
+      <div class="diver-bar-wrap"><div class="diver-bar" id="bar2" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <!-- VS strip -->
+  <div class="duo-score-strip">
+    <span>🐠 <span id="ds1">0</span></span>
+    <span class="vs-badge">VS</span>
+    <span><span id="ds2">0</span> 🐡</span>
+  </div>
+
+  <!-- Two panels -->
+  <div class="duo-panels">
+    <div class="duo-panel dp1">
+      <div class="dp-hdr">🐠 Игрок 1</div>
+      <div class="mini-bubble">
+        <div class="mb-ql">Часть речи?</div>
+        <div class="mb-word" id="p1Word">?</div>
+      </div>
+      <div class="duo-shells" id="p1Shells"></div>
+    </div>
+    <div class="duo-panel dp2">
+      <div class="dp-hdr">🐡 Игрок 2</div>
+      <div class="mini-bubble">
+        <div class="mb-ql">Часть речи?</div>
+        <div class="mb-word" id="p2Word">?</div>
+      </div>
+      <div class="duo-shells" id="p2Shells"></div>
+    </div>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div class="screen" id="results">
+  <div class="result-card">
+    <span class="result-emoji" id="resEmoji">🏆</span>
+    <div class="result-title" id="resTitle"></div>
+    <div class="result-stars" id="resStars"></div>
+    <div class="result-score" id="resScore"></div>
+    <div class="result-btns">
+      <button class="res-btn primary" onclick="playAgain()">Ещё раз! 🔄</button>
+      <button class="res-btn secondary" onclick="goMenu()">Меню 🏠</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== DECORATIONS =====
+(function(){
+  // Bubbles
+  for(let i=0;i<14;i++){
+    const b=document.createElement('div');b.className='bbl';
+    const sz=6+Math.random()*20;
+    b.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}vw;bottom:${Math.random()*80}vh;animation-duration:${5+Math.random()*10}s;animation-delay:-${Math.random()*10}s;`;
+    document.body.appendChild(b);
+  }
+  // Seaweed
+  const sw=document.createElement('div');sw.className='seaweed';sw.style.cssText='left:0;right:0;display:flex;gap:18px;padding:0 10px;';
+  const swEmoji=['🌿','🪸','🌾','🌿','🪸','🌾','🌿','🪸','🌾','🌿','🪸','🌾','🌿'];
+  swEmoji.forEach((e,i)=>{const s=document.createElement('span');s.className='sw';s.textContent=e;s.style.animationDelay=`${i*0.3}s`;sw.appendChild(s);});
+  document.body.appendChild(sw);
+  // BG fish
+  const fishArr=['🐟','🐠','🐡','🦈','🐙','🦑','🐳','🐬'];
+  for(let i=0;i<6;i++){
+    const f=document.createElement('div');f.className='bg-fish';
+    f.textContent=fishArr[i%fishArr.length];
+    const top=10+Math.random()*70;
+    f.style.cssText=`top:${top}vh;animation-duration:${12+Math.random()*18}s;animation-delay:-${Math.random()*20}s;font-size:${18+Math.random()*18}px;`;
+    document.body.appendChild(f);
+  }
+})();
+
+// ===== AUDIO =====
+let audioCtx=null,musicOn=true,bgTimer=null,bgIdx=0;
+const mel=[330,330,370,330,440,415,330,330,370,330,494,440];
+function getCtx(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx;}
+function tone(f,d,type='sine',vol=0.14){
+  try{const c=getCtx(),o=c.createOscillator(),g=c.createGain();
+  o.connect(g);g.connect(c.destination);o.type=type;o.frequency.value=f;
+  g.gain.setValueAtTime(vol,c.currentTime);g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+d);
+  o.start();o.stop(c.currentTime+d);}catch(e){}
+}
+function playOk(){tone(523,.09,'sine',.2);setTimeout(()=>tone(659,.09,'sine',.2),80);setTimeout(()=>tone(784,.2,'sine',.22),160);}
+function playNo(){tone(220,.08,'sawtooth',.15);setTimeout(()=>tone(185,.2,'sawtooth',.12),80);}
+function playClick(){tone(440,.07,'sine',.1);}
+function playWin(){[523,587,659,784,880,1047].forEach((f,i)=>setTimeout(()=>tone(f,.15,'sine',.22),i*80));}
+function bgNote(){if(!musicOn)return;tone(mel[bgIdx%mel.length],.35,'triangle',.05);bgIdx++;bgTimer=setTimeout(bgNote,420);}
+function startBg(){stopBg();if(musicOn)bgNote();}
+function stopBg(){if(bgTimer)clearTimeout(bgTimer);}
+function toggleMusic(){musicOn=!musicOn;document.getElementById('musicBtn').textContent=musicOn?'🎵':'🔇';if(musicOn)startBg();else stopBg();}
+
+// Confetti (bubbles style)
+const CC=['#FF7043','#AB47BC','#26C6DA','#66BB6A','#FFD740','#FF4081','#00E5FF'];
+function confetti(){
+  const b=document.getElementById('confettiBox');
+  for(let i=0;i<90;i++)setTimeout(()=>{
+    const p=document.createElement('div');p.className='confetti-piece';
+    p.style.cssText=`left:${Math.random()*100}vw;background:${CC[~~(Math.random()*CC.length)]};width:${7+Math.random()*9}px;height:${7+Math.random()*9}px;border-radius:50%;animation-duration:${1.8+Math.random()*2}s;animation-delay:${Math.random()*.5}s;`;
+    b.appendChild(p);setTimeout(()=>p.remove(),4200);
+  },i*20);
+}
+
+// Toast
+let toastT=null;
+function toast(msg,type){const t=document.getElementById('toast');if(toastT)clearTimeout(toastT);t.textContent=msg;t.className=`toast show ${type}-t`;toastT=setTimeout(()=>t.classList.remove('show'),1500);}
+
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+function goMenu(){stopBg();playClick();showScreen('menu');startBg();}
+
+// ===== WORD POOL =====
+const pool={
+  noun:[
+    'солнце','дерево','школа','город','зима','ребёнок','река',
+    'книга','облако','птица','мама','кошка','урок','земля','снег',
+    'стол','окно','небо','лес','дом','море','рыба','кот','мяч','сад',
+  ],
+  verb:[
+    'бежать','прыгать','читать','рисовать','петь','плыть','смеяться',
+    'думать','играть','лететь','писать','строить','кричать','сидеть',
+    'танцевать','спать','учить','дружить','нырять','светить',
+  ],
+  adj:[
+    'красивый','синий','мягкий','весёлый','добрый','зелёный','большой',
+    'умный','белый','быстрый','тёплый','круглый','сладкий','старый',
+    'новый','смелый','грустный','яркий','тихий','высокий',
+  ],
+  adverb:[
+    'быстро','тихо','вчера','здесь','громко','далеко','весело',
+    'сегодня','высоко','медленно','рядом','утром','очень','везде',
+    'снова','вместе','всегда','вечером','нигде','легко',
+  ],
+};
+const types=['noun','verb','adj','adverb'];
+const typeInfo={
+  noun:{label:'Существительное',q:'Кто? Что?',icon:'🐚'},
+  verb:{label:'Глагол',q:'Что делает?',icon:'🦑'},
+  adj:{label:'Прилагательное',q:'Какой? Какая?',icon:'🐙'},
+  adverb:{label:'Наречие',q:'Как? Где? Когда?',icon:'🐡'},
+};
+const shellColors=['s0','s1','s2','s3'];
+const duoColors1=['d1s0','d1s1','d1s2','d1s3'];
+const duoColors2=['d2s0','d2s1','d2s2','d2s3'];
+
+let lastUsed={noun:[],verb:[],adj:[],adverb:[]};
+function shuffle(a){return[...a].sort(()=>Math.random()-.5);}
+
+function pickWord(type){
+  let avail=pool[type].filter(w=>!lastUsed[type].includes(w));
+  if(!avail.length){lastUsed[type]=[];avail=[...pool[type]];}
+  const w=shuffle(avail)[0];
+  lastUsed[type].push(w);if(lastUsed[type].length>8)lastUsed[type].shift();
+  return w;
+}
+
+function genWordQ(){
+  const type=types[~~(Math.random()*4)];
+  const word=pickWord(type);
+  return{word,type};
+}
+
+// Move diver
+function moveDiver(diverId,barId,progress){
+  const diver=document.getElementById(diverId);
+  const road=diver.parentElement;
+  const rw=road.offsetWidth||300;
+  const maxPx=rw-44-10;
+  diver.style.left=Math.max(4,Math.min(4+progress*maxPx,rw-44))+'px';
+  if(barId)document.getElementById(barId).style.width=(progress*100)+'%';
+}
+
+// Build answer shells (4 options)
+function buildShells(containerId,correctType,colors,onClickFn){
+  const shuffledTypes=shuffle(types);
+  const el=document.getElementById(containerId);
+  el.innerHTML='';
+  shuffledTypes.forEach((t,i)=>{
+    const btn=document.createElement('button');
+    btn.className=`shell-btn ${colors[i]}`;
+    const inf=typeInfo[t];
+    btn.innerHTML=`<span class="shell-icon">${inf.icon}</span><span class="shell-label">${inf.label}</span><span class="shell-q">${inf.q}</span>`;
+    btn.dataset.type=t;
+    btn.onclick=()=>onClickFn(t,btn,el);
+    el.appendChild(btn);
+  });
+}
+
+// Build DUO shells (4 options smaller)
+function buildDuoShells(containerId,correctType,colors,onClickFn){
+  const shuffledTypes=shuffle(types);
+  const el=document.getElementById(containerId);
+  el.innerHTML='';
+  shuffledTypes.forEach((t,i)=>{
+    const btn=document.createElement('button');
+    btn.className=`duo-shell ${colors[i]}`;
+    const inf=typeInfo[t];
+    btn.innerHTML=`<span class="ds-icon">${inf.icon}</span>${inf.label}`;
+    btn.dataset.type=t;
+    let _fired=false;
+    const handler=(e)=>{
+      e.preventDefault();e.stopPropagation();
+      if(_fired)return;_fired=true;
+      onClickFn(t,btn,el);
+      setTimeout(()=>{_fired=false;},500);
+    };
+    btn.addEventListener('touchstart',handler,{passive:false});
+    btn.addEventListener('click',handler);
+    el.appendChild(btn);
+  });
+}
+
+// ===== SOLO =====
+let soloQ={},soloScore=0,soloTotal=10,soloAnswered=false,currentMode='solo';
+
+function startSolo(){
+  playClick();currentMode='solo';
+  soloScore=0;soloAnswered=false;
+  document.getElementById('soloScore').textContent='0 ✅';
+  moveDiver('soloDiver','soloBar',0);
+  showScreen('soloScreen');startBg();
+  nextSoloQ();
+}
+
+function nextSoloQ(){
+  soloAnswered=false;
+  if(soloScore>=soloTotal){endSolo();return;}
+  soloQ=genWordQ();
+  const el=document.getElementById('soloWord');
+  el.style.animation='none';void el.offsetWidth;el.style.animation='';
+  el.textContent=soloQ.word;
+  document.getElementById('soloInfo').textContent=`Вопрос ${soloScore+1} / ${soloTotal}`;
+  buildShells('soloShells',soloQ.type,shellColors,(chosen,btn,container)=>{
+    if(soloAnswered)return;soloAnswered=true;
+    if(chosen===soloQ.type){
+      btn.classList.add('correct-flash');
+      soloScore++;
+      document.getElementById('soloScore').textContent=soloScore+' ✅';
+      moveDiver('soloDiver','soloBar',soloScore/soloTotal);
+      playOk();toast('✅ Верно! '+typeInfo[chosen].icon,'correct');
+    } else {
+      btn.classList.add('wrong-flash');playNo();
+      toast('❌ Это '+typeInfo[soloQ.type].icon+' '+typeInfo[soloQ.type].label,'wrong');
+      container.querySelectorAll('.shell-btn').forEach(b=>{if(b.dataset.type===soloQ.type)b.classList.add('correct-flash');});
+    }
+    container.querySelectorAll('.shell-btn').forEach(b=>b.disabled=true);
+    setTimeout(nextSoloQ,1300);
+  });
+}
+
+function endSolo(){
+  stopBg();
+  const pct=Math.round(soloScore/soloTotal*100);
+  let e,t,s,m;
+  if(pct===100){e='🏆';t='Чемпион!';s='⭐⭐⭐';m='Все 10 из 10! Идеальное погружение!';}
+  else if(pct>=70){e='🥇';t='Отлично!';s='⭐⭐';m=soloScore+' из '+soloTotal+'. Почти идеально!';}
+  else if(pct>=50){e='🥈';t='Хорошо!';s='⭐';m=soloScore+' из '+soloTotal+'. Тренируйся ещё!';}
+  else{e='🐠';t='Не сдавайся!';s='💪';m=soloScore+' из '+soloTotal+'. Ещё раз в воду!';}
+  document.getElementById('resEmoji').textContent=e;
+  document.getElementById('resTitle').textContent=t;
+  document.getElementById('resStars').textContent=s;
+  document.getElementById('resScore').textContent=m;
+  if(pct>=70){confetti();playWin();}else tone(300,.5,'triangle',.13);
+  setTimeout(()=>showScreen('results'),500);
+}
+
+// ===== DUO =====
+let p1={q:{},score:0,locked:false};
+let p2={q:{},score:0,locked:false};
+const DUO_WIN=10;
+
+function startDuo(){
+  playClick();currentMode='duo';
+  p1={q:{},score:0,locked:false};
+  p2={q:{},score:0,locked:false};
+  ['d1Score','d2Score'].forEach(id=>document.getElementById(id).textContent='0 ✅');
+  ['ds1','ds2'].forEach(id=>document.getElementById(id).textContent='0');
+  moveDiver('car1','bar1',0);moveDiver('car2','bar2',0);
+  showScreen('duoScreen');startBg();
+  newDuoQ(1);newDuoQ(2);
+}
+
+function newDuoQ(pl){
+  const state=pl===1?p1:p2;
+  state.q=genWordQ();state.locked=false;
+  const wordEl=document.getElementById('p'+pl+'Word');
+  wordEl.textContent=state.q.word;
+  const colors=pl===1?duoColors1:duoColors2;
+  buildDuoShells('p'+pl+'Shells',state.q.type,colors,(chosen,btn,container)=>{
+    if(state.locked)return;
+    if(chosen===state.q.type){
+      state.locked=true;
+      btn.classList.add('correct-flash');
+      state.score++;
+      document.getElementById('d'+pl+'Score').textContent=state.score+' ✅';
+      document.getElementById('ds'+pl).textContent=state.score;
+      moveDiver('car'+pl,'bar'+pl,state.score/DUO_WIN);
+      playOk();
+      container.querySelectorAll('.duo-shell').forEach(b=>b.disabled=true);
+      if(state.score>=DUO_WIN){setTimeout(()=>endDuo(pl),700);return;}
+      setTimeout(()=>newDuoQ(pl),900);
+    } else {
+      btn.classList.add('wrong-flash');playNo();
+      setTimeout(()=>btn.classList.remove('wrong-flash'),380);
+    }
+  });
+}
+
+function endDuo(winner){
+  stopBg();confetti();playWin();
+  const icons=['🐠','🐡'];
+  document.getElementById('wEmoji').textContent=winner===1?'🐠':'🐡';
+  document.getElementById('wTitle').textContent='Победил Игрок '+winner+'! 🏆';
+  document.getElementById('wSub').textContent='Счёт: 🐠'+p1.score+' — '+p2.score+' 🐡';
+  document.getElementById('winnerOverlay').classList.add('show');
+}
+
+function closeWinner(){document.getElementById('winnerOverlay').classList.remove('show');}
+function playAgain(){closeWinner();if(currentMode==='solo')startSolo();else startDuo();}
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+
+window.addEventListener('click',()=>{if(!audioCtx){getCtx();if(musicOn)startBg();}},{once:true});
+
+// ===== TOUCH PROTECTION =====
+document.addEventListener('touchstart',function(e){if(e.touches.length>1)e.preventDefault();},{passive:false});
+document.addEventListener('touchmove',function(e){if(e.touches.length>1)e.preventDefault();},{passive:false});
+var _lt=0;
+document.addEventListener('touchend',function(e){var n=Date.now();if(n-_lt<350)e.preventDefault();_lt=n;},{passive:false});
+
+</script>
+</body>
+</html>
